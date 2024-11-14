@@ -13,6 +13,6 @@ public class Main {
         pipe.executeFilters();
 
         timer.endTimer();
-        System.out.printf("Total execution time %s seconds.\n", timer.getTime());
+        System.out.printf(timer.getTime());
     }
 }

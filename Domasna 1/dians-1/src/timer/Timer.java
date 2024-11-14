@@ -1,7 +1,5 @@
 package timer;
 
-import java.text.DecimalFormat;
-
 public class Timer {
     long startTime;
     long endTime;
@@ -15,7 +13,8 @@ public class Timer {
 
     public String getTime() {
         double durationInSeconds = (endTime - startTime) / 1_000_000_000.0;
-        DecimalFormat decimalFormat = new DecimalFormat("#.###");
-        return decimalFormat.format(durationInSeconds);
+        long minutes = (long) (durationInSeconds / 60);
+        double seconds = durationInSeconds % 60;
+        return String.format("Total execution time: %d minutes %.3f seconds\n", minutes, seconds);
     }
 }
