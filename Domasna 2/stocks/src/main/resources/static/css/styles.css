@@ -1,0 +1,88 @@
+/* FOR master-template.html */
+
+html, body, #body-container {
+    min-height: 100vh;
+}
+
+body {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    color: #555555;
+}
+
+.custom-shadow {
+    box-shadow: 0 .15rem 1.75rem 0 rgba(58, 59, 69, .15) !important;
+}
+
+
+#sidebar {
+    background-color: #466cd9;
+}
+
+#sidebar > a {
+    margin-bottom: 3rem;
+    text-decoration: none;
+    color: #fff;
+}
+
+#sidebar > a span{
+    font-size: 140%; font-weight: 700
+}
+
+#sidebar li {
+    margin-left: 2rem;
+}
+
+#sidebar li a i {
+    width: 3rem;
+}
+
+#sidebar li a span {
+    font-size: 1.25rem;
+}
+
+.sidebar-line-breaker {
+    margin: 0.5rem 2rem;
+    color: #fff;
+}
+
+#header-container, #sidebar > a {
+    height: 8vh;
+}
+
+#body-content-container {
+    min-height: 80%; background-color: #fefefe;
+}
+
+#footer-container {
+    min-height: 10vh;
+}
+
+/* FOR issuers.html */
+#issuersTable, #stocksTable {
+    border-collapse: separate;
+    border-radius: 0.5rem;
+    border-spacing: 0;
+    overflow: hidden;
+}
+
+.issuers-container > div:first-child {
+    height: 10%;
+}
+
+.issuers-container > div:nth-child(2) {
+    height: 90%;
+}
+
+.issuers-container button {
+    background-color: #466cd9
+}
+
+#sort-label, #issuer-label {
+    width: 50%;
+}
+
+#companyData {
+    display: none;
+}
+
