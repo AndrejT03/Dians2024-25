@@ -1,13 +1,9 @@
 package com.dians.stocks.controller;
 
-import com.dians.stocks.dto.CompanyDTO;
-import com.dians.stocks.service.CompanyService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/")

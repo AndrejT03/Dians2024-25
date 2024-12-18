@@ -5,6 +5,7 @@ import com.dians.stocks.dto.CompanyDTO;
 import com.dians.stocks.repository.CompanyRepository;
 import com.dians.stocks.service.CompanyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,18 +16,25 @@ import java.util.stream.Collectors;
 public class CompanyServiceImpl implements CompanyService {
   private final CompanyRepository companyRepository;
 
-  public List<CompanyDTO> findAllCompaniesDTO(String sort, int page, int pageSize) {
-    List<CompanyDTO> companies = this.companyRepository
-        .findAll().stream()
-        .map(this::convertToCompanyDTO)
-        .collect(Collectors.toList());
+  @Override
+  public Page<CompanyDTO> findAllCompaniesDTO(String sort, int page, int pageSize) {
+    String sortBy = sort.split("-")[0];
+    String order = sort.split("-")[1];
 
-    if(sort.equals("code-asc"))
-      companies.sort(Comparator.comparing(CompanyDTO::getCode));
-    else
-      companies.sort(Comparator.comparing(CompanyDTO::getCode).reversed());
+    Pageable pageable;
+    if(order.equals("asc")) {
+      pageable = PageRequest.of(page, pageSize, Sort.by(sortBy).ascending());
+    }
+    else {
+      pageable = PageRequest.of(page, pageSize, Sort.by(sortBy).descending());
+    }
 
-    return companies.stream().skip((long) page * pageSize).limit(pageSize).collect(Collectors.toList());
+    Page<Company> companiesPage = this.companyRepository.findAll(pageable);
+    List<CompanyDTO> companiesList = companiesPage
+        .stream()
+        .map(this::convertToCompanyDTO).collect(Collectors.toList());
+
+    return new PageImpl<>(companiesList, companiesPage.getPageable(), companiesPage.getTotalElements());
   }
 
   @Override
@@ -56,11 +64,6 @@ public class CompanyServiceImpl implements CompanyService {
     this.companyRepository.deleteById(id);
   }
 
-  @Override
-  public int countCompanies() {
-    return this.companyRepository.findAll().size();
-  }
-
   // Vo mapper
   @Override
   public CompanyDTO convertToCompanyDTO(Company company) {
@@ -80,11 +83,4 @@ public class CompanyServiceImpl implements CompanyService {
     return map;
   }
 
-//  @Override
-//  public List<String> getAllCompanyCodes() {
-//    List<CompanyDTO> companies = new ArrayList<>();
-//    this.companyRepository.findAll().forEach(c -> companies.add(this.convertToCompanyDTO(c)));
-//    companies.sort(Comparator.comparing(CompanyDTO::getCode));
-//    return companies.stream().map(CompanyDTO::getCode).collect(Collectors.toList());
-//  }
 }

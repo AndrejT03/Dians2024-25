@@ -3,11 +3,11 @@ const pageSize = 15;
 let sort = "code-asc"
 $(document).ready(function() {
     function fetchTableData(page, sort) {
-        fetch(`/api/table-data/issuers/?sort=${sort}&page=${page}&pageSize=${pageSize}`)
+        fetch(`/api/table-data/issuers/?page=${page}&pageSize=${pageSize}&sort=${sort}`)
             .then(response => response.json())
             .then(data => {
                 let companies = data.companies;
-                let totalCount = data.totalCount;
+                let totalPageCount = data.totalPageCount;
                 const tableBody = document.querySelector("#issuersTable tbody")
                 tableBody.innerHTML = "";
                 companies.forEach(company => {
@@ -22,7 +22,7 @@ $(document).ready(function() {
                 });
 
                 $("#prevPage").prop('disabled', page === 0);
-                $("#nextPage").prop('disabled', page === totalCount - 1);
+                $("#nextPage").prop('disabled', page === totalPageCount - 1);
             })
             .catch(error => {
                 console.error("Error fetching the API: ", error);

@@ -9,7 +9,7 @@ $(document).ready(function() {
             .then(data => {
                 let stocks = data.stocks;
                 let company = data.company;
-                let totalCount = data.totalCount;
+                let totalPageCount = data.totalPageCount;
                 const tableBody = document.querySelector("#stocksTable tbody")
                 tableBody.innerHTML = "";
                 stocks.forEach(stock => {
@@ -33,7 +33,7 @@ $(document).ready(function() {
                 });
 
                 $("#prevPage").prop('disabled', page === 0);
-                $("#nextPage").prop('disabled', page === totalCount - 1);
+                $("#nextPage").prop('disabled', page === totalPageCount - 1);
             })
             .catch(error => {
                 console.error("Error fetching the API: ", error);

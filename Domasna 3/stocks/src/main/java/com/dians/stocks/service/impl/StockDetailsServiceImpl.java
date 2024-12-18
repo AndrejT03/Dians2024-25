@@ -7,10 +7,10 @@ import com.dians.stocks.repository.CompanyRepository;
 import com.dians.stocks.repository.StockDetailsRepository;
 import com.dians.stocks.service.StockDetailsService;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,11 +28,6 @@ public class StockDetailsServiceImpl implements StockDetailsService {
   @Override
   public Optional<StockDetailsHistory> findByDateAndCompany(LocalDate date, Company company) {
     return this.stockDetailsRepository.findByDateAndCompany(date, company);
-  }
-
-  @Override
-  public Optional<StockDetailsHistory> save(StockDetailsHistory stockDetails) {
-    return Optional.of(this.stockDetailsRepository.save(stockDetails));
   }
 
   @Override
@@ -65,26 +60,24 @@ public class StockDetailsServiceImpl implements StockDetailsService {
 
   @Override
   @Transactional
-  public List<StockDTO> findRequestedStocks(Long companyId, int page, int pageSize, String sort) {
-    List<StockDTO> stocks = this.stockDetailsRepository.findAll()
-        .stream().filter(s -> s.getCompany().getId().equals(companyId))
-        .map(this::convertToStockDTO).collect(Collectors.toList());
+  public Page<StockDTO> findRequestedStocks(Long companyId, int page, int pageSize, String sort) {
+    String sortBy = sort.split("-")[0];
+    String order = sort.split("-")[1];
 
-    if(sort.equals("date-closest")) {
-      stocks.sort(Comparator.comparing(StockDTO::getOriginalDate).reversed());
+    Pageable pageable;
+    if(order.equals("asc")) {
+      pageable = PageRequest.of(page, pageSize, Sort.by(sortBy).ascending());
     }
     else {
-      stocks.sort(Comparator.comparing(StockDTO::getOriginalDate));
+      pageable = PageRequest.of(page, pageSize, Sort.by(sortBy).descending());
     }
 
-    return stocks.stream().skip((long) page * pageSize).limit(pageSize).collect(Collectors.toList());
-  }
+    Page<StockDetailsHistory> stocksPage = this.stockDetailsRepository.findAllByCompanyId(companyId, pageable);
+    List<StockDTO> stocksList = stocksPage
+        .stream()
+        .map(this::convertToStockDTO).collect(Collectors.toList());
 
-  @Override
-  public int countStocks(Long companyId) {
-    return (int) this.stockDetailsRepository.findAll()
-        .stream().filter(s -> s.getCompany().getId().equals(companyId)).count();
+    return new PageImpl<>(stocksList, stocksPage.getPageable(), stocksPage.getTotalElements());
   }
-
 
 }
