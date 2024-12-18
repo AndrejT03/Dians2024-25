@@ -1,0 +1,27 @@
+# Database
+spring:
+  application:
+    name: app
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dians
+    username: username
+    password: password
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 20000
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      default_schema: public
+      format_sql: true
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+  # Thymeleaf
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
