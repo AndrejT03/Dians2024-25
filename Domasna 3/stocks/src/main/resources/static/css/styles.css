@@ -78,11 +78,17 @@ body {
     background-color: #466cd9
 }
 
-#sort-label, #issuer-label {
+#sort-label, #issuer-label,
+#year-label, #timeline-label{
     width: 50%;
 }
 
 #companyData {
     display: none;
+}
+
+#chartHolder {
+    border-radius: 0.5rem;
+    background-color: #fff
 }
 

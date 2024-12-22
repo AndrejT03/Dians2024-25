@@ -1,6 +1,7 @@
 package com.dians.stocks.controller;
 
 import com.dians.stocks.dto.StockDTO;
+import com.dians.stocks.dto.StockGraphDTO;
 import com.dians.stocks.service.CompanyService;
 import com.dians.stocks.service.StockDetailsService;
 import jakarta.transaction.Transactional;
@@ -9,11 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/table-data/stocks/")
+@RequestMapping("/api/table-data/stocks")
 public class StocksController {
   private final StockDetailsService stockDetailsService;
   private final CompanyService companyService;
@@ -32,8 +34,18 @@ public class StocksController {
     Map<String, Object> response = new HashMap<>();
     Page<StockDTO> stocksPage = this.stockDetailsService.findRequestedStocks(companyId, page, pageSize, sort);
     response.put("stocks", stocksPage.get().collect(Collectors.toList()));
-    response.put("company", this.companyService.findByIdToDTO(companyId));
     response.put("totalPageCount", stocksPage.getTotalPages());
     return ResponseEntity.ok().body(response);
+  }
+
+  @GetMapping("/graph")
+  public ResponseEntity<List<StockGraphDTO>> getStocksForGraph(@RequestParam Long companyId,
+                                                               @RequestParam Integer year) {
+    return ResponseEntity.ok().body(this.stockDetailsService.findAllStockGraphDTOByCompanyIdAndYear(companyId, year));
+  }
+
+  @GetMapping("/graph-years")
+  public ResponseEntity<List<Integer>> getYearsForGraph(@RequestParam Long companyId) {
+    return ResponseEntity.ok().body(this.stockDetailsService.findGraphYearsAvailable(companyId));
   }
 }

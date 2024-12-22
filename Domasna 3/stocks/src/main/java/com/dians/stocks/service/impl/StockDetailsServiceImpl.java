@@ -3,6 +3,7 @@ package com.dians.stocks.service.impl;
 import com.dians.stocks.domain.Company;
 import com.dians.stocks.domain.StockDetailsHistory;
 import com.dians.stocks.dto.StockDTO;
+import com.dians.stocks.dto.StockGraphDTO;
 import com.dians.stocks.repository.CompanyRepository;
 import com.dians.stocks.repository.StockDetailsRepository;
 import com.dians.stocks.service.StockDetailsService;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,6 +59,35 @@ public class StockDetailsServiceImpl implements StockDetailsService {
         .turnoverInBestDenars(stock.getPriceFormatted(stock.getTurnoverInBestDenars()))
         .totalTurnoverInDenars(stock.getPriceFormatted(stock.getTotalTurnoverInDenars()))
         .build();
+  }
+
+  @Override
+  public StockGraphDTO convertToStockGraphDTO(StockDetailsHistory stock) {
+    return new StockGraphDTO()
+        .builder()
+        .date(stock.getDate())
+        .price(stock.getLastTransactionPrice())
+        .build();
+  }
+
+  @Override
+  public List<StockGraphDTO> findAllStockGraphDTOByCompanyIdAndYear(Long companyId, Integer year) {
+    LocalDate startDate = LocalDate.of(year, 1, 1);
+    LocalDate endDate = LocalDate.of(year, 12, 31);
+    return this.stockDetailsRepository.findAllByDateBetweenAndCompanyId(startDate, endDate, companyId)
+        .stream()
+        .map(this::convertToStockGraphDTO).collect(Collectors.toList());
+  }
+
+  @Override
+  @Transactional
+  public List<Integer> findGraphYearsAvailable(Long companyId) {
+    Set<Integer> yearSet = new TreeSet<>();
+    this.stockDetailsRepository.findAllByCompanyId(companyId)
+        .forEach(stock -> {
+          yearSet.add(Integer.parseInt(stock.getDateAsString().split("\\.")[2]));
+        });
+    return yearSet.stream().toList().reversed();
   }
 
   @Override

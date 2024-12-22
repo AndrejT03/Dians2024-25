@@ -4,6 +4,7 @@ import com.dians.stocks.domain.Company;
 import com.dians.stocks.dto.CompanyDTO;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,5 +16,5 @@ public interface CompanyService {
   CompanyDTO findByIdToDTO(Long id);
   void deleteById(Long id);
   CompanyDTO convertToCompanyDTO(Company company);
-  Map<Long, String> getMapOfCompanyCodesAndIds();
+  List<CompanyDTO> getAllCompaniesDTO();
 }

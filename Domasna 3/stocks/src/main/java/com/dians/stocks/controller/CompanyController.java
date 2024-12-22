@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,7 @@ public class CompanyController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Map<Long, String>> getAllCompanyCodes() {
-        return ResponseEntity.ok().body(this.companyService.getMapOfCompanyCodesAndIds());
+    public ResponseEntity<List<CompanyDTO>> getAllCompanyCodes() {
+        return ResponseEntity.ok().body(this.companyService.getAllCompaniesDTO());
     }
 }

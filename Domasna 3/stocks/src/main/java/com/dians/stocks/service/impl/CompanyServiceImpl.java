@@ -77,10 +77,10 @@ public class CompanyServiceImpl implements CompanyService {
   }
 
   @Override
-  public Map<Long, String> getMapOfCompanyCodesAndIds() {
-    Map<Long, String> map = new TreeMap<>();
-    this.companyRepository.findAll().forEach(c -> map.put(c.getId(), c.getCode()));
-    return map;
+  public List<CompanyDTO> getAllCompaniesDTO() {
+    return this.companyRepository.findAll()
+        .stream()
+        .map(this::convertToCompanyDTO).collect(Collectors.toList());
   }
 
 }

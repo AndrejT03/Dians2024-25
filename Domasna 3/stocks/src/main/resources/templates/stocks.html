@@ -3,12 +3,12 @@
     <div class="row m-2">
         <div class="col-md-4 col-sm-12">
             <div id="companyData" th:attr="data-company-id=${companyId}"></div>
-            <h3 id="stocksText"></h3>
+            <h3 id="stocksText">Daily Stocks Table</h3>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-12">
             <div class="d-flex">
                 <div id="issuer-label" class="d-flex align-items-center justify-content-end me-3">
-                    <span>Select code:</span>
+                    <span>Select issuer:</span>
                 </div>
                 <select id="issuerDropdown" class="form-select" aria-label="Select Issuer">
                 </select>
@@ -43,14 +43,47 @@
                 </tr>
                 </thead>
                 <tbody>
-
                 </tbody>
             </table>
         </div>
         <div class="col-12">
-            <div class="d-flex align-items-center justify-content-center mt-4">
+            <div class="d-flex align-items-center justify-content-center mt-4 mb-2">
                 <button id="prevPage" class="btn btn-primary me-1 custom-shadow">Previous</button>
                 <button id="nextPage" class="btn btn-primary ms-1 custom-shadow">Next</button>
+            </div>
+        </div>
+    </div>
+    <div class="row m-2">
+        <div class="col-md-4 col-sm-12">
+            <h3>Technical Analysis</h3>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-12">
+            <div class="d-flex">
+                <div id="timeline-label" class="d-flex align-items-center justify-content-end me-3">
+                    <span>Show by:</span>
+                </div>
+                <select id="timelineDropdown" class="form-select" aria-label="Select Timeline View">
+                    <option value="day" selected>Day</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-12">
+            <div class="d-flex">
+                <div id="year-label" class="d-flex align-items-center justify-content-end me-3">
+                    <span>Select year:</span>
+                </div>
+                <select id="yearDropdown" class="form-select" aria-label="Select Year">
+
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row m-2">
+        <div class="col-12">
+            <div id="chartHolder" class="custom-shadow p-4">
+                <canvas id="chart"></canvas>
             </div>
         </div>
     </div>
