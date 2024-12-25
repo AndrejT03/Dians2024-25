@@ -2,7 +2,6 @@ package com.dians.stocks.controller;
 
 import com.dians.stocks.dto.StockDTO;
 import com.dians.stocks.dto.StockGraphDTO;
-import com.dians.stocks.service.CompanyService;
 import com.dians.stocks.service.StockDetailsService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -18,11 +17,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/table-data/stocks")
 public class StocksController {
   private final StockDetailsService stockDetailsService;
-  private final CompanyService companyService;
 
-  public StocksController(StockDetailsService stockDetailsService, CompanyService companyService) {
+  public StocksController(StockDetailsService stockDetailsService) {
     this.stockDetailsService = stockDetailsService;
-    this.companyService = companyService;
   }
 
   @GetMapping
@@ -48,4 +45,5 @@ public class StocksController {
   public ResponseEntity<List<Integer>> getYearsForGraph(@RequestParam Long companyId) {
     return ResponseEntity.ok().body(this.stockDetailsService.findGraphYearsAvailable(companyId));
   }
+
 }

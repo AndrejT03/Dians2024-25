@@ -46,6 +46,16 @@ body {
     color: #fff;
 }
 
+.btn-update-db {
+    font-size: 120%;
+    font-weight: 600;
+    color: #466cd9;
+}
+
+.btn-update-db:hover {
+    color: #466cd9;
+}
+
 #header-container, #sidebar > a {
     height: 8vh;
 }
