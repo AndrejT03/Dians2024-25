@@ -70,10 +70,13 @@ body {
 
 /* FOR issuers.html */
 #issuersTable, #stocksTable {
+    overflow: hidden;
+}
+
+.scrollable-table-container {
     border-collapse: separate;
     border-radius: 0.5rem;
     border-spacing: 0;
-    overflow: hidden;
 }
 
 .issuers-container > div:first-child {
@@ -101,4 +104,3 @@ body {
     border-radius: 0.5rem;
     background-color: #fff
 }
-

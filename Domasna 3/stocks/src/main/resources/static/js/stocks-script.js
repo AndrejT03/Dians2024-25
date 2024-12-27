@@ -10,6 +10,7 @@ $(document).ready(function() {
             .then(data => {
                 let stocks = data.stocks;
                 let totalPageCount = data.totalPageCount;
+                let issuerCode = data.issuerCode;
                 const tableBody = document.querySelector("#stocksTable tbody")
                 tableBody.innerHTML = "";
                 stocks.forEach(stock => {
@@ -26,9 +27,12 @@ $(document).ready(function() {
                         <td>${stock.totalTurnoverInDenars}</td>
                     `;
                     tableBody.appendChild(row);
+
                     let dropdown = document.querySelector("#issuerDropdown");
                     let option = dropdown.querySelector(`option[value="${companyId}"]`);
                     option.selected = true;
+
+                    document.getElementById("stocksText").innerHTML = `Stocks Table for ${issuerCode}`;
                 });
 
                 $("#prevPage").prop('disabled', page === 0);
@@ -39,11 +43,31 @@ $(document).ready(function() {
             });
     }
 
+    function fetchTechnicalIndicatorsData(companyId) {
+        fetch(`/api/table-data/stocks/technical-indicators?companyId=${companyId}`)
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector("#indicatorsTable tbody");
+                tableBody.innerHTML = "";
+                data.forEach(ind => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${ind.name}</td>
+                        <td>${ind.hasEnoughDayData ? ind.dayValue : '/'}</td>
+                        <td>${ind.hasEnoughWeekData ? ind.weekValue : '/'}</td>
+                        <td>${ind.hasEnoughMonthData ? ind.monthValue : '/'}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            });
+    }
+
     //const companyDataElement = document.getElementById("companyData");
     //companyId = companyDataElement.getAttribute("data-company-id");
 
     fetchIssuersDropdownData();
     fetchTableData(companyId, currentPage, pageSize, sort);
+    fetchTechnicalIndicatorsData(companyId);
 
     const canvas = document.getElementById("chart");
     const canvasCtx = canvas.getContext('2d');
@@ -70,15 +94,15 @@ $(document).ready(function() {
         return fetch(`/api/table-data/stocks/graph-years?companyId=${companyId}`)
             .then(response => response.json())
             .then(data => {
-               const dropdownList = document.getElementById("yearDropdown");
-               dropdownList.innerHTML = "";
-               data.forEach(year => {
-                  dropdownList.innerHTML += `
+                const dropdownList = document.getElementById("yearDropdown");
+                dropdownList.innerHTML = "";
+                data.forEach(year => {
+                    dropdownList.innerHTML += `
                   <option value="${year}">${year}</option>
                   `
-               });
+                });
 
-               graphYear = dropdownList.value;
+                graphYear = dropdownList.value;
             });
     }
 
@@ -90,6 +114,7 @@ $(document).ready(function() {
         fetchGraphYearsAvailable().then(() => {
             loadChart();
         });
+        fetchTechnicalIndicatorsData(companyId);
     });
 
     $("#sortFilterDropdown").change(function () {
@@ -99,8 +124,8 @@ $(document).ready(function() {
     });
 
     $("#yearDropdown").change(function () {
-       graphYear = $(this).val();
-       loadChart();
+        graphYear = $(this).val();
+        loadChart();
     });
 
     $("#prevPage").click(function() {
@@ -121,38 +146,38 @@ $(document).ready(function() {
             .then(data => {
                 const xValues = [];
                 const yValues = [];
-               data.forEach(dayInfo => {
-                   xValues.push(dayInfo.date);
-                   yValues.push(dayInfo.price);
-               });
+                data.forEach(dayInfo => {
+                    xValues.push(dayInfo.date);
+                    yValues.push(dayInfo.price);
+                });
 
-               canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-               chartObj !== null && chartObj.destroy();
-               chartObj = new Chart("chart", {
-                  type: "line",
-                  data: {
-                      labels: xValues,
-                      datasets: [{
-                          fill: false,
-                          lineTension: 0,
-                          borderColor: 'rgb(75, 192, 192)',
-                          backgroundColor: '#466cd9',
-                          data: yValues
-                      }]
-                  },
-                   options: {
-                      legend: {display: false},
-                       title: {
-                          display: false
-                       },
-                       elements: {
-                          point: {
-                              radius: 2,
-                              hitRadius: 3
-                          }
-                       }
-                   }
-               });
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+                chartObj !== null && chartObj.destroy();
+                chartObj = new Chart("chart", {
+                    type: "line",
+                    data: {
+                        labels: xValues,
+                        datasets: [{
+                            fill: false,
+                            lineTension: 0,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: '#466cd9',
+                            data: yValues
+                        }]
+                    },
+                    options: {
+                        legend: {display: false},
+                        title: {
+                            display: false
+                        },
+                        elements: {
+                            point: {
+                                radius: 2,
+                                hitRadius: 3
+                            }
+                        }
+                    }
+                });
             });
     }
 });

@@ -47,27 +47,27 @@ public class StockDetailsServiceImpl implements StockDetailsService {
   @Transactional
   public StockDTO convertToStockDTO(StockDetailsHistory stock) {
     return new StockDTO()
-        .builder()
-        .date(stock.getDateAsString())
-        .originalDate(stock.getDate())
-        .lastTransactionPrice(stock.getPriceFormatted(stock.getLastTransactionPrice()))
-        .minPrice(stock.getPriceFormatted(stock.getMinPrice()))
-        .maxPrice(stock.getPriceFormatted(stock.getMinPrice()))
-        .averagePrice(stock.getPriceFormatted(stock.getAveragePercentage()))
-        .averagePercentage(stock.getPriceFormatted(stock.getAveragePercentage()))
-        .quantity(stock.getQuantity())
-        .turnoverInBestDenars(stock.getPriceFormatted(stock.getTurnoverInBestDenars()))
-        .totalTurnoverInDenars(stock.getPriceFormatted(stock.getTotalTurnoverInDenars()))
-        .build();
+            .builder()
+            .date(stock.getDateAsString())
+            .originalDate(stock.getDate())
+            .lastTransactionPrice(stock.getPriceFormatted(stock.getLastTransactionPrice()))
+            .minPrice(stock.getPriceFormatted(stock.getMinPrice()))
+            .maxPrice(stock.getPriceFormatted(stock.getMinPrice()))
+            .averagePrice(stock.getPriceFormatted(stock.getAveragePercentage()))
+            .averagePercentage(stock.getPriceFormatted(stock.getAveragePercentage()))
+            .quantity(stock.getQuantity())
+            .turnoverInBestDenars(stock.getPriceFormatted(stock.getTurnoverInBestDenars()))
+            .totalTurnoverInDenars(stock.getPriceFormatted(stock.getTotalTurnoverInDenars()))
+            .build();
   }
 
   @Override
   public StockGraphDTO convertToStockGraphDTO(StockDetailsHistory stock) {
     return new StockGraphDTO()
-        .builder()
-        .date(stock.getDate())
-        .price(stock.getLastTransactionPrice())
-        .build();
+            .builder()
+            .date(stock.getDate())
+            .price(stock.getLastTransactionPrice())
+            .build();
   }
 
   @Override
@@ -75,8 +75,8 @@ public class StockDetailsServiceImpl implements StockDetailsService {
     LocalDate startDate = LocalDate.of(year, 1, 1);
     LocalDate endDate = LocalDate.of(year, 12, 31);
     return this.stockDetailsRepository.findAllByDateBetweenAndCompanyId(startDate, endDate, companyId)
-        .stream()
-        .map(this::convertToStockGraphDTO).collect(Collectors.toList());
+            .stream()
+            .map(this::convertToStockGraphDTO).collect(Collectors.toList());
   }
 
   @Override
@@ -84,10 +84,16 @@ public class StockDetailsServiceImpl implements StockDetailsService {
   public List<Integer> findGraphYearsAvailable(Long companyId) {
     Set<Integer> yearSet = new TreeSet<>();
     this.stockDetailsRepository.findAllByCompanyId(companyId)
-        .forEach(stock -> {
-          yearSet.add(Integer.parseInt(stock.getDateAsString().split("\\.")[2]));
-        });
+            .forEach(stock -> {
+              yearSet.add(Integer.parseInt(stock.getDateAsString().split("\\.")[2]));
+            });
     return yearSet.stream().toList().reversed();
+  }
+
+  @Override
+  public List<StockDetailsHistory> findLast30ByCompanyId(Long companyId) {
+    Pageable pageable = PageRequest.of(0, 30, Sort.by("date").descending());
+    return this.stockDetailsRepository.findAllByCompanyId(companyId, pageable).stream().toList();
   }
 
   @Override
@@ -106,8 +112,8 @@ public class StockDetailsServiceImpl implements StockDetailsService {
 
     Page<StockDetailsHistory> stocksPage = this.stockDetailsRepository.findAllByCompanyId(companyId, pageable);
     List<StockDTO> stocksList = stocksPage
-        .stream()
-        .map(this::convertToStockDTO).collect(Collectors.toList());
+            .stream()
+            .map(this::convertToStockDTO).collect(Collectors.toList());
 
     return new PageImpl<>(stocksList, stocksPage.getPageable(), stocksPage.getTotalElements());
   }

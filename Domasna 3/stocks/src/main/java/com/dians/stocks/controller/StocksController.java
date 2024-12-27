@@ -1,8 +1,11 @@
 package com.dians.stocks.controller;
 
+import com.dians.stocks.domain.TechnicalIndicator;
 import com.dians.stocks.dto.StockDTO;
 import com.dians.stocks.dto.StockGraphDTO;
+import com.dians.stocks.service.CompanyService;
 import com.dians.stocks.service.StockDetailsService;
+import com.dians.stocks.service.TechnicalIndicatorService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +20,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/table-data/stocks")
 public class StocksController {
   private final StockDetailsService stockDetailsService;
+  private final CompanyService companyService;
+  private final TechnicalIndicatorService technicalIndicatorService;
 
-  public StocksController(StockDetailsService stockDetailsService) {
+  public StocksController(StockDetailsService stockDetailsService, CompanyService companyService, TechnicalIndicatorService technicalIndicatorService) {
     this.stockDetailsService = stockDetailsService;
+    this.companyService = companyService;
+    this.technicalIndicatorService = technicalIndicatorService;
   }
 
   @GetMapping
@@ -32,6 +39,7 @@ public class StocksController {
     Page<StockDTO> stocksPage = this.stockDetailsService.findRequestedStocks(companyId, page, pageSize, sort);
     response.put("stocks", stocksPage.get().collect(Collectors.toList()));
     response.put("totalPageCount", stocksPage.getTotalPages());
+    response.put("issuerCode", this.companyService.findByIdToDTO(companyId).getCode());
     return ResponseEntity.ok().body(response);
   }
 
@@ -44,6 +52,11 @@ public class StocksController {
   @GetMapping("/graph-years")
   public ResponseEntity<List<Integer>> getYearsForGraph(@RequestParam Long companyId) {
     return ResponseEntity.ok().body(this.stockDetailsService.findGraphYearsAvailable(companyId));
+  }
+
+  @GetMapping("/technical-indicators")
+  public ResponseEntity<List<TechnicalIndicator>> getTechnicalIndicators(@RequestParam Long companyId) {
+    return ResponseEntity.ok().body(this.technicalIndicatorService.getTechnicalIndicators(companyId));
   }
 
 }

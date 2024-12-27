@@ -18,4 +18,5 @@ public interface StockDetailsService {
   StockGraphDTO convertToStockGraphDTO(StockDetailsHistory stock);
   List<StockGraphDTO> findAllStockGraphDTOByCompanyIdAndYear(Long companyId, Integer year);
   List<Integer> findGraphYearsAvailable(Long companyId);
+  List<StockDetailsHistory> findLast30ByCompanyId(Long companyId);
 }
