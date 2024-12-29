@@ -59,4 +59,14 @@ public class StocksController {
     return ResponseEntity.ok().body(this.technicalIndicatorService.getTechnicalIndicators(companyId));
   }
 
+  @GetMapping("/technical-oscillators")
+  public ResponseEntity<List<TechnicalIndicator>> getTechnicalOscillators(@RequestParam Long companyId) {
+    return ResponseEntity.ok().body(this.technicalIndicatorService.getTechnicalOscillators(companyId));
+  }
+
+  @GetMapping("/signals")
+  public ResponseEntity<List<String>> getSignals(@RequestParam Long companyId) {
+    return ResponseEntity.ok().body(this.technicalIndicatorService.getFinalSignalsList(companyId));
+  }
+
 }

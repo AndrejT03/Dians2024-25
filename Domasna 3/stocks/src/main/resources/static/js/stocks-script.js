@@ -53,21 +53,55 @@ $(document).ready(function() {
                     const row = document.createElement("tr");
                     row.innerHTML = `
                         <td>${ind.name}</td>
-                        <td>${ind.hasEnoughDayData ? ind.dayValue : '/'}</td>
-                        <td>${ind.hasEnoughWeekData ? ind.weekValue : '/'}</td>
-                        <td>${ind.hasEnoughMonthData ? ind.monthValue : '/'}</td>
+                        <td>${ind.hasEnoughDayData ? ind.dayValue : 'Not Available'}</td>
+                        <td>${ind.hasEnoughWeekData ? ind.weekValue : 'Not Available'}</td>
+                        <td>${ind.hasEnoughMonthData ? ind.monthValue : 'Not Available'}</td>
                     `;
                     tableBody.appendChild(row);
                 });
             });
     }
 
-    //const companyDataElement = document.getElementById("companyData");
-    //companyId = companyDataElement.getAttribute("data-company-id");
+    function fetchTechnicalOscillatorsData(companyId) {
+        fetch(`/api/table-data/stocks/technical-oscillators?companyId=${companyId}`)
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector("#oscillatorsTable tbody");
+                tableBody.innerHTML = "";
+                data.forEach(ind => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${ind.name}</td>
+                        <td>${ind.hasEnoughDayData ? ind.dayValue : 'Not Available'}</td>
+                        <td>${ind.hasEnoughWeekData ? ind.weekValue : 'Not Available'}</td>
+                        <td>${ind.hasEnoughMonthData ? ind.monthValue : 'Not Available'}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            });
+    }
+
+    function fetchSignals(companyId) {
+        fetch(`/api/table-data/stocks/signals?companyId=${companyId}`)
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector("#signalsTable tbody");
+                tableBody.innerHTML = "";
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                        <th>Signals</th>
+                        <td>${data[0]}</td>
+                        <td>${data[1]}</td>
+                    `;
+                tableBody.appendChild(row);
+            });
+    }
 
     fetchIssuersDropdownData();
     fetchTableData(companyId, currentPage, pageSize, sort);
     fetchTechnicalIndicatorsData(companyId);
+    fetchTechnicalOscillatorsData(companyId);
+    fetchSignals(companyId);
 
     const canvas = document.getElementById("chart");
     const canvasCtx = canvas.getContext('2d');
@@ -115,6 +149,8 @@ $(document).ready(function() {
             loadChart();
         });
         fetchTechnicalIndicatorsData(companyId);
+        fetchTechnicalOscillatorsData(companyId);
+        fetchSignals(companyId);
     });
 
     $("#sortFilterDropdown").change(function () {

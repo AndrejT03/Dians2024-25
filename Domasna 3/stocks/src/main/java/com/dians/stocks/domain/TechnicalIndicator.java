@@ -17,8 +17,12 @@ public class TechnicalIndicator {
     public boolean hasEnoughDayData;
     public boolean hasEnoughWeekData;
     public boolean hasEnoughMonthData;
+    public String shortTermSignal;
+    public String longTermSignal;
 
     public TechnicalIndicator(String name) {
         this.name = name;
+        this.shortTermSignal = "";
+        this.longTermSignal = "";
     }
 }
