@@ -9,6 +9,7 @@
     <script src="/webjars/bootstrap/5.3.3/js/bootstrap.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script th:src="@{/js/master-script.js}"></script>
 
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -25,13 +26,6 @@
             <span style="">Rising Stocks</span>
         </a>
         <li class="nav-item d-flex justify-content-start align-items-center text-center">
-            <a class="nav-link active text-light" href="/home">
-                <i class="fa-solid fa-house fa-lg"></i>
-                <span>Home</span>
-            </a>
-        </li>
-        <hr class="sidebar-line-breaker">
-        <li class="nav-item d-flex justify-content-start align-items-center text-center">
             <a class="nav-link text-light" href="/issuers">
                 <i class="fa-solid fa-building fa-lg"></i>
                 <span>Issuers</span>
@@ -44,8 +38,15 @@
                 <span>Stocks</span>
             </a>
         </li>
-        <li class="nav-item d-flex justify-content-start align-items-center text-center">
-            <a type="button" href="/update-database" class="btn btn-light btn-update-db mt-4">Update Database</a>
+        <li class="nav-item d-flex flex-wrap justify-content-start align-items-center text-center">
+            <div>
+                <button type="button" href="/update-database" id="btn-update-db" class="btn btn-light mt-4">Update Database</button>
+            </div>
+            <div class="ms-3 mt-2">
+                <span id="db-updating-started" class="update-db-status">Updating database...</span>
+                <span id="db-updating-finished" class="update-db-status">Update finished!</span>
+                <span id="db-updating-failed" class="update-db-status">Update failed.</span>
+            </div>
         </li>
     </ul>
     <main class="container-fluid col-md-10 col-sm-9 flex-grow-1">

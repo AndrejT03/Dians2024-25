@@ -1,5 +1,3 @@
-/* FOR master-template.html */
-
 html, body, #body-container {
     min-height: 100vh;
 }
@@ -46,14 +44,19 @@ body {
     color: #fff;
 }
 
-.btn-update-db {
+#btn-update-db {
     font-size: 120%;
     font-weight: 600;
     color: #466cd9;
 }
 
-.btn-update-db:hover {
+#btn-update-db:hover {
     color: #466cd9;
+}
+
+.update-db-status {
+    display: none;
+    color: white;
 }
 
 #header-container, #sidebar > a {
@@ -68,9 +71,22 @@ body {
     min-height: 10vh;
 }
 
-/* FOR issuers.html */
 #issuersTable, #stocksTable {
     overflow: hidden;
+}
+
+#issuersTable thead th,
+#stocksTable thead th,
+#indicatorsTable thead th,
+#oscillatorsTable thead th,
+#signalsTable thead th {
+    background-color: #466cd9;
+    color: #fff;
+}
+
+thead > tr > th {
+    background-color: #466cd9;
+    color: #fff;
 }
 
 .scrollable-table-container {
@@ -88,7 +104,7 @@ body {
 }
 
 .issuers-container button {
-    background-color: #466cd9
+    background-color: #466cd9;
 }
 
 #sort-label, #issuer-label,

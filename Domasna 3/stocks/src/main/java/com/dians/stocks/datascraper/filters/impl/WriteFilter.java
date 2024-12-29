@@ -54,8 +54,8 @@ public class WriteFilter implements IFilter<String, String> {
 
         stockDetails.setDate(date);
         stockDetails.setLastTransactionPrice(new BigDecimal(this.stringToBigDecimalFormat(infoElements.get(1).text())));
-        stockDetails.setMinPrice(new BigDecimal(this.stringToBigDecimalFormat(infoElements.get(2).text())));
-        stockDetails.setMaxPrice(new BigDecimal(this.stringToBigDecimalFormat(infoElements.get(3).text())));
+        stockDetails.setMaxPrice(new BigDecimal(this.stringToBigDecimalFormat(infoElements.get(2).text())));
+        stockDetails.setMinPrice(new BigDecimal(this.stringToBigDecimalFormat(infoElements.get(3).text())));
         stockDetails.setAveragePrice(new BigDecimal(this.stringToBigDecimalFormat(infoElements.get(4).text())));
         stockDetails.setAveragePercentage(new BigDecimal(this.stringToBigDecimalFormat(infoElements.get(5).text())));
         stockDetails.setQuantity(Integer.parseInt(this.stringToBigDecimalFormat(infoElements.get(6).text())));
