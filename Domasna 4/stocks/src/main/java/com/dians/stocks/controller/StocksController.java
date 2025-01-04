@@ -39,7 +39,7 @@ public class StocksController {
     Page<StockDTO> stocksPage = this.stockDetailsService.findRequestedStocks(companyId, page, pageSize, sort);
     response.put("stocks", stocksPage.get().collect(Collectors.toList()));
     response.put("totalPageCount", stocksPage.getTotalPages());
-    response.put("issuerCode", this.companyService.findByIdToDTO(companyId).getCode());
+    response.put("companyCode", this.companyService.findByIdToDTO(companyId).getCode());
     return ResponseEntity.ok().body(response);
   }
 

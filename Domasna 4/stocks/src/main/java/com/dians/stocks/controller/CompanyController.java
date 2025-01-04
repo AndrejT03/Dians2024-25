@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/table-data/issuers/")
+@RequestMapping("/api/table-data/companies/")
 @RequiredArgsConstructor
 public class CompanyController {
     private final CompanyService companyService;

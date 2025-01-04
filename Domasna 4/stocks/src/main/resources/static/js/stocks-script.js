@@ -1,16 +1,22 @@
+/* Variables that we use for the initial load
+* as well as for manipulating the data based on user input. */
 let companyId = 1;
 let currentPage = 0;
 const pageSize = 15;
 let sort = "date-closest";
 let graphYear;
 $(document).ready(function() {
-    function fetchTableData(companyId, page, pageSize, sort) {
-        fetch(`/api/table-data/stocks?companyId=${companyId}&page=${page}&pageSize=${pageSize}&sort=${sort}`)
+    /* This function is sending an API GET request to StocksController and in the response body
+    * expects a list of the requested stocks, total page count used for enabling/disabling the pagination buttons and
+    * the code of the company whose stocks we are showing in the stocks table. In the request there are the current page number,
+    * the size of the page and the sort method. We also send the company id so the backend knows which stocks to get from the database. */
+    function fetchStocksTableData() {
+        fetch(`/api/table-data/stocks?companyId=${companyId}&page=${currentPage}&pageSize=${pageSize}&sort=${sort}`)
             .then(response => response.json())
             .then(data => {
                 let stocks = data.stocks;
                 let totalPageCount = data.totalPageCount;
-                let issuerCode = data.issuerCode;
+                let companyCode = data.companyCode;
                 const tableBody = document.querySelector("#stocksTable tbody")
                 tableBody.innerHTML = "";
                 stocks.forEach(stock => {
@@ -28,94 +34,33 @@ $(document).ready(function() {
                     `;
                     tableBody.appendChild(row);
 
-                    let dropdown = document.querySelector("#issuerDropdown");
+                    /* This code is updating the selected option of the dropdown
+                    list where we choose the company and show their stocks. */
+                    let dropdown = document.querySelector("#companiesDropdown");
                     let option = dropdown.querySelector(`option[value="${companyId}"]`);
                     option.selected = true;
 
-                    document.getElementById("stocksText").innerHTML = `Stocks Table for ${issuerCode}`;
+                    // We use the company code from the response body here to update the text above the table
+                    document.getElementById("stocksText").innerHTML = `Stocks Table for ${companyCode}`;
                 });
 
-                $("#prevPage").prop('disabled', page === 0);
-                $("#nextPage").prop('disabled', page === totalPageCount - 1);
+                // Disabling the buttons based on the current page or the total pages available
+                $("#prevPage").prop('disabled', currentPage === 0);
+                $("#nextPage").prop('disabled', currentPage === totalPageCount - 1);
             })
             .catch(error => {
                 console.error("Error fetching the API: ", error);
             });
     }
 
-    function fetchTechnicalIndicatorsData(companyId) {
-        fetch(`/api/table-data/stocks/technical-indicators?companyId=${companyId}`)
+    /* This function gets the company ids, codes and names in the body of the response
+    * from StocksController and then fills the dropdown list with the company information.
+    * We then use that dropdown to switch to stocks of a different company. */
+    function fetchCompaniesDropdownData() {
+        fetch("/api/table-data/companies/all")
             .then(response => response.json())
             .then(data => {
-                const tableBody = document.querySelector("#indicatorsTable tbody");
-                tableBody.innerHTML = "";
-                data.forEach(ind => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${ind.name}</td>
-                        <td>${ind.hasEnoughDayData ? ind.dayValue : 'Not Available'}</td>
-                        <td>${ind.hasEnoughWeekData ? ind.weekValue : 'Not Available'}</td>
-                        <td>${ind.hasEnoughMonthData ? ind.monthValue : 'Not Available'}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            });
-    }
-
-    function fetchTechnicalOscillatorsData(companyId) {
-        fetch(`/api/table-data/stocks/technical-oscillators?companyId=${companyId}`)
-            .then(response => response.json())
-            .then(data => {
-                const tableBody = document.querySelector("#oscillatorsTable tbody");
-                tableBody.innerHTML = "";
-                data.forEach(ind => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${ind.name}</td>
-                        <td>${ind.hasEnoughDayData ? ind.dayValue : 'Not Available'}</td>
-                        <td>${ind.hasEnoughWeekData ? ind.weekValue : 'Not Available'}</td>
-                        <td>${ind.hasEnoughMonthData ? ind.monthValue : 'Not Available'}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            });
-    }
-
-    function fetchSignals(companyId) {
-        fetch(`/api/table-data/stocks/signals?companyId=${companyId}`)
-            .then(response => response.json())
-            .then(data => {
-                const tableBody = document.querySelector("#signalsTable tbody");
-                tableBody.innerHTML = "";
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                        <th>Signals</th>
-                        <td>${data[0]}</td>
-                        <td>${data[1]}</td>
-                    `;
-                tableBody.appendChild(row);
-            });
-    }
-
-    fetchIssuersDropdownData();
-    fetchTableData(companyId, currentPage, pageSize, sort);
-    fetchTechnicalIndicatorsData(companyId);
-    fetchTechnicalOscillatorsData(companyId);
-    fetchSignals(companyId);
-
-    const canvas = document.getElementById("chart");
-    const canvasCtx = canvas.getContext('2d');
-    let chartObj = null;
-
-    fetchGraphYearsAvailable().then(() => {
-        loadChart();
-    });
-
-    function fetchIssuersDropdownData() {
-        fetch("/api/table-data/issuers/all")
-            .then(response => response.json())
-            .then(data => {
-                const dropdownList = document.getElementById("issuerDropdown");
+                const dropdownList = document.getElementById("companiesDropdown");
                 data.forEach(company => {
                     dropdownList.innerHTML += `
                     <option value="${company.companyId}">${company.name} - ${company.code}</option>
@@ -124,6 +69,10 @@ $(document).ready(function() {
             });
     }
 
+    /* This function fetches every available year for the company stocks. For example:
+    * if the company doesn't have stock objects recorded in the database for the year 2023,
+    * then that year won't be available in this dropdown list. We use the dropdown to switch
+    * between years since we are showing the graph information for a timeline of 1 year. */
     function fetchGraphYearsAvailable() {
         return fetch(`/api/table-data/stocks/graph-years?companyId=${companyId}`)
             .then(response => response.json())
@@ -140,42 +89,70 @@ $(document).ready(function() {
             });
     }
 
-    $("#issuerDropdown").change(function() {
-        sort = "date-closest";
-        currentPage = 0;
-        companyId = $(this).val();
-        fetchTableData(companyId, currentPage, pageSize, sort);
-        fetchGraphYearsAvailable().then(() => {
-            loadChart();
+    /* This function writes creates table rows for the given table body
+    * and fills them with information from the data object in order
+    * to cut down the duplicate code in the two functions below this one. */
+    function writeTechnicalAnalysisTableRows(data, tableBody) {
+        tableBody.innerHTML = "";
+        data.forEach(ind => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                        <td>${ind.name}</td>
+                        <td>${ind.hasEnoughDayData ? ind.dayValue : 'Not Available'}</td>
+                        <td>${ind.hasEnoughWeekData ? ind.weekValue : 'Not Available'}</td>
+                        <td>${ind.hasEnoughMonthData ? ind.monthValue : 'Not Available'}</td>
+                    `;
+            tableBody.appendChild(row);
         });
-        fetchTechnicalIndicatorsData(companyId);
-        fetchTechnicalOscillatorsData(companyId);
-        fetchSignals(companyId);
-    });
+    }
 
-    $("#sortFilterDropdown").change(function () {
-        sort = $(this).val();
-        currentPage = 0;
-        fetchTableData(companyId, currentPage, pageSize, sort);
-    });
+    /* This function sends an API GET request with company id parameter to StocksController
+    *  and in the response body expects the technical indicators for the stocks based on the company id.
+    * The function then proceeds to update the indicators table on the front-end with the information from the response.*/
+    function fetchTechnicalIndicatorsData() {
+        fetch(`/api/table-data/stocks/technical-indicators?companyId=${companyId}`)
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector("#indicatorsTable tbody");
+                writeTechnicalAnalysisTableRows(data, tableBody);
+            });
+    }
 
-    $("#yearDropdown").change(function () {
-        graphYear = $(this).val();
-        loadChart();
-    });
+    /* This function sends an API GET request with company id parameter to StocksController
+    *  and in the response body expects the technical oscillators for the stocks based on the company id.
+    * The function then proceeds to update the oscillators table on the front-end with the information from the response.*/
+    function fetchTechnicalOscillatorsData() {
+        fetch(`/api/table-data/stocks/technical-oscillators?companyId=${companyId}`)
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector("#oscillatorsTable tbody");
+                writeTechnicalAnalysisTableRows(data, tableBody);
+            });
+    }
 
-    $("#prevPage").click(function() {
-        if(currentPage > 0) {
-            currentPage--;
-            fetchTableData(companyId, currentPage, pageSize, sort);
-        }
-    });
+    /* This function sends an API GET request with company id parameter to StocksController
+    *  and in the response body expects the signals (Buy, Hold, Sell) for the stocks based on the company id.
+    * The function then proceeds to update the signals table on the front-end with the information from the response.*/
+    function fetchSignals() {
+        fetch(`/api/table-data/stocks/signals?companyId=${companyId}`)
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector("#signalsTable tbody");
+                tableBody.innerHTML = "";
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                        <th>Signals</th>
+                        <td>${data[0]}</td>
+                        <td>${data[1]}</td>
+                    `;
+                tableBody.appendChild(row);
+            });
+    }
 
-    $("#nextPage").click(function() {
-        currentPage++;
-        fetchTableData(companyId, currentPage, pageSize, sort);
-    });
-
+    /* This function gets information about a stock object for the current company and the date
+    * when this stock object is recorded. The request parameters are the company id and the year
+    * for which we request stocks. We are displaying the values on the X-axis and Y-axis and using a basic
+    * Chart.js chart without any complex changes to the template code for this JS library. */
     function loadChart() {
         fetch(`/api/table-data/stocks/graph?companyId=${companyId}&year=${graphYear}`)
             .then(response => response.json())
@@ -216,4 +193,65 @@ $(document).ready(function() {
                 });
             });
     }
+
+    /* This here is the initial call to these functions that is made
+    instantly after the document is ready (during the page load). */
+    fetchCompaniesDropdownData();
+    fetchStocksTableData();
+    fetchTechnicalIndicatorsData();
+    fetchTechnicalOscillatorsData();
+    fetchSignals();
+
+    // Also initially we create an empty canvas in order to paint it with the stocks chart.
+    const canvas = document.getElementById("chart");
+    const canvasCtx = canvas.getContext('2d');
+    let chartObj = null;
+
+    /* Here we are first filling the dropdown list with the available years
+    * and then we are loading the chart since we need the last year in the dropdown
+    * to show any valid information. */
+    fetchGraphYearsAvailable().then(() => {
+        loadChart();
+    });
+
+    // Giving functionality to the companies dropdown list.
+    $("#companiesDropdown").change(function() {
+        sort = "date-closest";
+        currentPage = 0;
+        companyId = $(this).val();
+        fetchStocksTableData();
+        fetchGraphYearsAvailable().then(() => {
+            loadChart();
+        });
+        fetchTechnicalIndicatorsData();
+        fetchTechnicalOscillatorsData();
+        fetchSignals();
+    });
+
+    // Giving functionality to the sorting dropdown list.
+    $("#sortFilterDropdown").change(function () {
+        sort = $(this).val();
+        currentPage = 0;
+        fetchStocksTableData();
+    });
+
+    // Giving functionality to the stock year dropdown list.
+    $("#yearDropdown").change(function () {
+        graphYear = $(this).val();
+        loadChart();
+    });
+
+    // The next two are event listeners for the pagination buttons.
+    $("#prevPage").click(function() {
+        if(currentPage > 0) {
+            currentPage--;
+            fetchStocksTableData();
+        }
+    });
+
+    $("#nextPage").click(function() {
+        currentPage++;
+        fetchStocksTableData();
+    });
+
 });

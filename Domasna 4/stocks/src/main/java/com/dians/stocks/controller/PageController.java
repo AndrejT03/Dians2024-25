@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class PageController {
 
   @GetMapping
-  @RequestMapping(value = {"", "/", "/home", "/issuers"})
-  public String getIssuersPage(Model model) {
-    model.addAttribute("title", "Issuers");
-    model.addAttribute("bodyContent", "Issuers");
+  @RequestMapping(value = {"", "/", "/home", "/companies"})
+  public String getCompaniesPage(Model model) {
+    model.addAttribute("title", "Companies");
+    model.addAttribute("bodyContent", "Companies");
     return "master-template";
   }
 
   @GetMapping("/stocks")
-  public String getIssuerInformation(Model model) {
+  public String getCompanyInformation(Model model) {
     model.addAttribute("title", "Stocks");
     model.addAttribute("bodyContent", "stocks");
     return "master-template";

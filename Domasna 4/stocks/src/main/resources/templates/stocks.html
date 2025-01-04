@@ -1,5 +1,5 @@
 <script th:src="@{/js/stocks-script.js}"></script>
-<div class="row m-2 justify-content-center issuers-container">
+<div class="row m-2 justify-content-center companies-container">
     <div class="row m-2">
         <div class="col-md-4 col-sm-12">
             <div id="companyData" th:attr="data-company-id=${companyId}"></div>
@@ -7,16 +7,16 @@
         </div>
         <div class="col-lg-4 col-md-4 col-sm-12">
             <div class="d-flex">
-                <div id="issuer-label" class="d-flex align-items-center justify-content-end me-3">
-                    <span>Select issuer:</span>
+                <div id="companyLabel" class="d-flex align-items-center justify-content-end me-3">
+                    <span>Select company:</span>
                 </div>
-                <select id="issuerDropdown" class="form-select" aria-label="Select Issuer">
+                <select id="companiesDropdown" class="form-select" aria-label="Select Company">
                 </select>
             </div>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-12">
             <div class="d-flex">
-                <div id="sort-label" class="d-flex align-items-center justify-content-end me-3">
+                <div id="sortLabel" class="d-flex align-items-center justify-content-end me-3">
                     <span>Sorted by:</span>
                 </div>
                 <select id="sortFilterDropdown" class="form-select" aria-label="Select Sorting Method">
@@ -61,7 +61,7 @@
         </div>
         <div class="col-lg-4 col-md-4 col-sm-12">
             <div class="d-flex">
-                <div id="year-label" class="d-flex align-items-center justify-content-end me-3">
+                <div id="yearLabel" class="d-flex align-items-center justify-content-end me-3">
                     <span>Select year:</span>
                 </div>
                 <select id="yearDropdown" class="form-select" aria-label="Select Year">
