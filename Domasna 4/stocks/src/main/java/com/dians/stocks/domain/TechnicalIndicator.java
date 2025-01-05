@@ -10,17 +10,19 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TechnicalIndicator {
+    public String code;
     public String name;
-    public BigDecimal dayValue;
-    public BigDecimal weekValue;
-    public BigDecimal monthValue;
-    public boolean hasEnoughDayData;
-    public boolean hasEnoughWeekData;
-    public boolean hasEnoughMonthData;
+    public BigDecimal valueByDay;
+    public BigDecimal valueByWeek;
+    public BigDecimal valueByMonth;
+    public boolean dayDataEnough;
+    public boolean weekDataEnough;
+    public boolean monthDataEnough;
     public String shortTermSignal;
     public String longTermSignal;
 
-    public TechnicalIndicator(String name) {
+    public TechnicalIndicator(String code, String name) {
+        this.code = code;
         this.name = name;
         this.shortTermSignal = "";
         this.longTermSignal = "";

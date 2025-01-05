@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/table-data/companies/")
+@RequestMapping("/api/companies/")
 @RequiredArgsConstructor
 public class CompanyController {
     private final CompanyService companyService;
@@ -23,7 +23,7 @@ public class CompanyController {
                                                      @RequestParam int pageSize,
                                                      @RequestParam String sort) {
         Map<String, Object> response = new HashMap<>();
-        Page<CompanyDTO> companiesPage = this.companyService.findAllCompaniesDTO(sort, page, pageSize);
+        Page<CompanyDTO> companiesPage = this.companyService.findAllCompaniesDTOToPage(sort, page, pageSize);
         response.put("companies", companiesPage.get().collect(Collectors.toList()));
         response.put("totalPageCount", companiesPage.getTotalPages());
         return ResponseEntity.ok().body(response);
@@ -31,6 +31,6 @@ public class CompanyController {
 
     @GetMapping("/all")
     public ResponseEntity<List<CompanyDTO>> getAllCompanyCodes() {
-        return ResponseEntity.ok().body(this.companyService.getAllCompaniesDTO());
+        return ResponseEntity.ok().body(this.companyService.findAllCompaniesDTO());
     }
 }

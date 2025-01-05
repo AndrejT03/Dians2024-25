@@ -1,7 +1,6 @@
 package com.dians.stocks.datascraper.filters.impl;
 
 import com.dians.stocks.datascraper.filters.IFilter;
-import com.dians.stocks.domain.Company;
 import com.dians.stocks.domain.StockDetailsHistory;
 import com.dians.stocks.service.CompanyService;
 import com.dians.stocks.service.StockDetailsService;
@@ -14,11 +13,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class WriteFilter implements IFilter<String, String> {
+public abstract class WriteFilter implements IFilter<String, String> {
   static final String url = "https://www.mse.mk/mk/stats/symbolhistory/";
   private final StockDetailsService stockDetailsService;
   private final CompanyService companyService;
@@ -29,9 +27,7 @@ public class WriteFilter implements IFilter<String, String> {
   }
 
   @Override
-  public Map<String, String> execute(Map<String, String> map) throws IOException {
-    return new HashMap<>();
-  }
+  public abstract Map<String, String> execute(Map<String, String> map) throws IOException;
 
   public void writeRows(Long companyId, String code, String queryString) throws IOException {
     Document doc = Jsoup.connect(String.format("%s%s%s", url, code, queryString)).get();

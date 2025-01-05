@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Data
@@ -38,9 +36,10 @@ public class Company {
         this.latestWrittenDate = "";
     }
 
+    /* Updates the information about the stocks for a specific company
+    * and saves the latest date for which a stock is available to a private variable. */
     public void updateStockInfo(String date) {
         this.latestWrittenDate = date;
         this.isStockHistoryEmpty = false;
     }
-
 }

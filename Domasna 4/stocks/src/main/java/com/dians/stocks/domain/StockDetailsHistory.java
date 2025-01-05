@@ -33,10 +33,12 @@ public class StockDetailsHistory {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+    // Formats the date to the format "d.M.yyyy" if the date is available
     public String getDateAsString() {
         return this.date != null ? this.date.format(FORMATTER) : "";
     }
 
+    // Formats the price to the format "#,##0.00"
     public String getPriceFormatted(BigDecimal price) {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 

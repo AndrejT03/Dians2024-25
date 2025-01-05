@@ -11,7 +11,7 @@ $(document).ready(function() {
     * the code of the company whose stocks we are showing in the stocks table. In the request there are the current page number,
     * the size of the page and the sort method. We also send the company id so the backend knows which stocks to get from the database. */
     function fetchStocksTableData() {
-        fetch(`/api/table-data/stocks?companyId=${companyId}&page=${currentPage}&pageSize=${pageSize}&sort=${sort}`)
+        fetch(`/api/stocks?companyId=${companyId}&page=${currentPage}&pageSize=${pageSize}&sort=${sort}`)
             .then(response => response.json())
             .then(data => {
                 let stocks = data.stocks;
@@ -57,7 +57,7 @@ $(document).ready(function() {
     * from StocksController and then fills the dropdown list with the company information.
     * We then use that dropdown to switch to stocks of a different company. */
     function fetchCompaniesDropdownData() {
-        fetch("/api/table-data/companies/all")
+        fetch("/api/companies/all")
             .then(response => response.json())
             .then(data => {
                 const dropdownList = document.getElementById("companiesDropdown");
@@ -74,7 +74,7 @@ $(document).ready(function() {
     * then that year won't be available in this dropdown list. We use the dropdown to switch
     * between years since we are showing the graph information for a timeline of 1 year. */
     function fetchGraphYearsAvailable() {
-        return fetch(`/api/table-data/stocks/graph-years?companyId=${companyId}`)
+        return fetch(`/api/stocks/graph-years?companyId=${companyId}`)
             .then(response => response.json())
             .then(data => {
                 const dropdownList = document.getElementById("yearDropdown");
@@ -97,10 +97,10 @@ $(document).ready(function() {
         data.forEach(ind => {
             const row = document.createElement("tr");
             row.innerHTML = `
-                        <td>${ind.name}</td>
-                        <td>${ind.hasEnoughDayData ? ind.dayValue : 'Not Available'}</td>
-                        <td>${ind.hasEnoughWeekData ? ind.weekValue : 'Not Available'}</td>
-                        <td>${ind.hasEnoughMonthData ? ind.monthValue : 'Not Available'}</td>
+                        <td>${ind.name} (${ind.code})</td>
+                        <td>${ind.dayDataEnough ? ind.valueByDay : 'Not Available'}</td>
+                        <td>${ind.weekDataEnough ? ind.valueByWeek : 'Not Available'}</td>
+                        <td>${ind.monthDataEnough ? ind.valueByMonth : 'Not Available'}</td>
                     `;
             tableBody.appendChild(row);
         });
@@ -110,7 +110,7 @@ $(document).ready(function() {
     *  and in the response body expects the technical indicators for the stocks based on the company id.
     * The function then proceeds to update the indicators table on the front-end with the information from the response.*/
     function fetchTechnicalIndicatorsData() {
-        fetch(`/api/table-data/stocks/technical-indicators?companyId=${companyId}`)
+        fetch(`/api/stocks/technical-indicators?companyId=${companyId}`)
             .then(response => response.json())
             .then(data => {
                 const tableBody = document.querySelector("#indicatorsTable tbody");
@@ -122,7 +122,7 @@ $(document).ready(function() {
     *  and in the response body expects the technical oscillators for the stocks based on the company id.
     * The function then proceeds to update the oscillators table on the front-end with the information from the response.*/
     function fetchTechnicalOscillatorsData() {
-        fetch(`/api/table-data/stocks/technical-oscillators?companyId=${companyId}`)
+        fetch(`/api/stocks/technical-oscillators?companyId=${companyId}`)
             .then(response => response.json())
             .then(data => {
                 const tableBody = document.querySelector("#oscillatorsTable tbody");
@@ -134,7 +134,7 @@ $(document).ready(function() {
     *  and in the response body expects the signals (Buy, Hold, Sell) for the stocks based on the company id.
     * The function then proceeds to update the signals table on the front-end with the information from the response.*/
     function fetchSignals() {
-        fetch(`/api/table-data/stocks/signals?companyId=${companyId}`)
+        fetch(`/api/stocks/signals?companyId=${companyId}`)
             .then(response => response.json())
             .then(data => {
                 const tableBody = document.querySelector("#signalsTable tbody");
@@ -154,7 +154,7 @@ $(document).ready(function() {
     * for which we request stocks. We are displaying the values on the X-axis and Y-axis and using a basic
     * Chart.js chart without any complex changes to the template code for this JS library. */
     function loadChart() {
-        fetch(`/api/table-data/stocks/graph?companyId=${companyId}&year=${graphYear}`)
+        fetch(`/api/stocks/graph?companyId=${companyId}&year=${graphYear}`)
             .then(response => response.json())
             .then(data => {
                 const xValues = [];

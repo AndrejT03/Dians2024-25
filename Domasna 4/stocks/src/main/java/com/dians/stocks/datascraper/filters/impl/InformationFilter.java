@@ -1,6 +1,5 @@
 package com.dians.stocks.datascraper.filters.impl;
 
-import com.dians.stocks.domain.Company;
 import com.dians.stocks.service.CompanyService;
 import com.dians.stocks.service.StockDetailsService;
 

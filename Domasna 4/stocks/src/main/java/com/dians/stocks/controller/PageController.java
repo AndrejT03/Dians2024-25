@@ -17,7 +17,7 @@ public class PageController {
   }
 
   @GetMapping("/stocks")
-  public String getCompanyInformation(Model model) {
+  public String getStocksPage(Model model) {
     model.addAttribute("title", "Stocks");
     model.addAttribute("bodyContent", "stocks");
     return "master-template";

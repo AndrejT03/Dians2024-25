@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/table-data/stocks")
+@RequestMapping("/api/stocks")
 public class StocksController {
   private final StockDetailsService stockDetailsService;
   private final CompanyService companyService;
@@ -36,7 +36,7 @@ public class StocksController {
                                                        @RequestParam int pageSize,
                                                        @RequestParam String sort) {
     Map<String, Object> response = new HashMap<>();
-    Page<StockDTO> stocksPage = this.stockDetailsService.findRequestedStocks(companyId, page, pageSize, sort);
+    Page<StockDTO> stocksPage = this.stockDetailsService.findAllStocksDTOByCompanyIdToPage(companyId, page, pageSize, sort);
     response.put("stocks", stocksPage.get().collect(Collectors.toList()));
     response.put("totalPageCount", stocksPage.getTotalPages());
     response.put("companyCode", this.companyService.findByIdToDTO(companyId).getCode());

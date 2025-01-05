@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StockDetailsService {
+  /* The explanation of the few confusing names are above
+   * the method overrides in the service implementation. */
   Optional<StockDetailsHistory> findByDateAndCompany(LocalDate date, Company company);
-  Page<StockDTO> findRequestedStocks(Long companyId, int page, int pageSize, String sort);
+  Page<StockDTO> findAllStocksDTOByCompanyIdToPage(Long companyId, int page, int pageSize, String sort);
   void addStockDetailToCompany(Long companyId, StockDetailsHistory stockDetailsHistory);
-  StockDTO convertToStockDTO(StockDetailsHistory stock);
-  StockGraphDTO convertToStockGraphDTO(StockDetailsHistory stock);
   List<StockGraphDTO> findAllStockGraphDTOByCompanyIdAndYear(Long companyId, Integer year);
   List<Integer> findGraphYearsAvailable(Long companyId);
   List<StockDetailsHistory> findLast30ByCompanyId(Long companyId);

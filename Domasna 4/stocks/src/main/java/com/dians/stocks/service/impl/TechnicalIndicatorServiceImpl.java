@@ -23,31 +23,60 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
     }
 
     @Override
+    /* Creates 5 indicators, sets their values and returns them as a list. */
     public List<TechnicalIndicator> getTechnicalIndicators(Long companyId) {
         this.stocks = this.stockDetailsService.findLast30ByCompanyId(companyId).reversed();
         List<TechnicalIndicator> indicatorsList = new ArrayList<>();
 
-        indicatorsList.add(calculateSMA());
-        indicatorsList.add(calculateEMA());
-        indicatorsList.add(calculateHMA());
-        indicatorsList.add(calculateVWMA());
-        indicatorsList.add(calculateIBL());
+        indicatorsList.add(new TechnicalIndicator("SMA", "Simple Moving Average"));
+        indicatorsList.add(new TechnicalIndicator("EMA", "Exponential Moving Average"));
+        indicatorsList.add(new TechnicalIndicator("HMA", "Hull Moving Average"));
+        indicatorsList.add(new TechnicalIndicator("VWMA", "Volume Weighted Moving Average"));
+        indicatorsList.add(new TechnicalIndicator("IBL", "Ichimoku Baseline"));
+
+        for(TechnicalIndicator indicator : indicatorsList) {
+            setValuesForIndicator(indicator);
+        }
 
         return indicatorsList;
     }
 
     @Override
+    /* Creates 5 oscillators, sets their values and returns them as a list. */
     public List<TechnicalIndicator> getTechnicalOscillators(Long companyId) {
         this.stocks = this.stockDetailsService.findLast30ByCompanyId(companyId).reversed();
         List<TechnicalIndicator> oscillatorsList = new ArrayList<>();
 
-        oscillatorsList.add(calculateRSI());
-        oscillatorsList.add(calculateROC());
-        oscillatorsList.add(calculateWPR());
-        oscillatorsList.add(calculateSTO());
-        oscillatorsList.add(calculateCCI());
+        oscillatorsList.add(new TechnicalIndicator("RSI", "Relative Strength Index"));
+        oscillatorsList.add(new TechnicalIndicator("ROC", "Rate of Change"));
+        oscillatorsList.add(new TechnicalIndicator("%R", "Williams Percent Range"));
+        oscillatorsList.add(new TechnicalIndicator("%K", "Stochastic Oscillator"));
+        oscillatorsList.add(new TechnicalIndicator("CCI", "Commodity Channel Index"));
+
+        for(TechnicalIndicator oscillator : oscillatorsList) {
+            setValuesForIndicator(oscillator);
+            oscillator.setShortTermSignal(getOscillatorSignal(oscillator.code, oscillator.getValueByWeek().doubleValue()));
+            oscillator.setLongTermSignal(getOscillatorSignal(oscillator.code, oscillator.getValueByMonth().doubleValue()));
+        }
 
         return oscillatorsList;
+    }
+
+    @Override
+    /* Sets the values for the indicator/oscillator that calls the method to eliminate the duplicate code. */
+    public void setValuesForIndicator(TechnicalIndicator indicator) {
+        checkIfIssuerHasEnoughStocksForTechnicalIndicator(indicator);
+
+        if(!indicator.code.equals("RSI")) {
+            indicator.setValueByDay(calculateIndicatorValueByTimeframe(indicator.isDayDataEnough(), getLastNStocks(2), indicator.code));
+            indicator.setValueByWeek(calculateIndicatorValueByTimeframe(indicator.isWeekDataEnough(), getLastNStocks(7), indicator.code));
+            indicator.setValueByMonth(calculateIndicatorValueByTimeframe(indicator.isMonthDataEnough(), this.stocks, indicator.code));
+        }
+        else {
+            indicator.setValueByDay(calculateRSIValuesByTimeframe(indicator.isDayDataEnough(), 2));
+            indicator.setValueByWeek(calculateRSIValuesByTimeframe(indicator.isWeekDataEnough(), 7));
+            indicator.setValueByMonth(calculateRSIValuesByTimeframe(indicator.isMonthDataEnough(), 30));
+        }
     }
 
     @Override
@@ -61,37 +90,255 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
     }
 
     @Override
+    /* Returns the last 'count' elements from the given list. */
     public List<BigDecimal> getLastNValues(List<BigDecimal> list, int count) {
         int size = list.size();
         return list.subList(Math.max(size - count, 0), size);
     }
 
     @Override
-    public TechnicalIndicator calculateRSI() {
-        TechnicalIndicator RSI = new TechnicalIndicator("Relative Strength Index (RSI)");
+    /* Checks if a stock has enough instances for calculating the indicator value */
+    public void checkIfIssuerHasEnoughStocksForTechnicalIndicator(TechnicalIndicator indicator) {
+        if(this.stocks.size() < 2) {
+            indicator.setDayDataEnough(false);
+            indicator.setWeekDataEnough(false);
+            indicator.setMonthDataEnough(false);
+        }
+        else if(this.stocks.size() < 7) {
+            indicator.setDayDataEnough(true);
+            indicator.setWeekDataEnough(false);
+            indicator.setMonthDataEnough(false);
+        }
+        else if(this.stocks.size() < 30) {
+            indicator.setDayDataEnough(true);
+            indicator.setWeekDataEnough(true);
+            indicator.setMonthDataEnough(false);
+        }
+        else {
+            indicator.setDayDataEnough(true);
+            indicator.setWeekDataEnough(true);
+            indicator.setMonthDataEnough(true);
+        }
+    }
 
-        checkIfIssuerHasEnoughStocksForTechnicalIndicator(RSI);
+    @Override
+    /* Returns the highest maximum price for the given stocks. */
+    public double getHighestHighForStocks(List<StockDetailsHistory> stocks) {
+        double highestHigh = stocks.getFirst().getMaxPrice().doubleValue();
+
+        for(int i=1; i<stocks.size(); i++) {
+            highestHigh = Math.max(highestHigh, stocks.get(i).getMaxPrice().doubleValue());
+        }
+        return highestHigh;
+    }
+
+    @Override
+    /* Returns the lowest minimum price for the given stocks. */
+    public double getLowestLowForStocks(List<StockDetailsHistory> stocks) {
+        double lowestLow = stocks.getFirst().getMinPrice().doubleValue();
+
+        for(int i=1; i<stocks.size(); i++) {
+            lowestLow = Math.min(lowestLow, stocks.get(i).getMinPrice().doubleValue());
+        }
+        return lowestLow;
+    }
+
+    @Override
+    /* This method has a lot of code, but it saves us from the duplicate code by calculating
+     * the indicator value depending on the code of the indicator that is calling the method. */
+    public BigDecimal calculateIndicatorValueByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks, String code) {
+        if(!hasEnoughData) {
+            return new BigDecimal(-999);
+        }
+
+        double result = 0;
+        /* Inside this switch-case we have implemented calculation
+         * of the value based on the formula for each indicator. */
+        switch(code) {
+            case "ROC": {
+                double currentPrice = stocks.getLast().getLastTransactionPrice().doubleValue();
+                double previousPrice = stocks.getFirst().getLastTransactionPrice().doubleValue();
+                result = (currentPrice - previousPrice) / previousPrice * 100;
+            } break;
+            case "%R": {
+                double close = stocks.getLast().getLastTransactionPrice().doubleValue();
+                double highestHigh = getHighestHighForStocks(stocks);
+                double lowestLow = getLowestLowForStocks(stocks);
+
+                if(highestHigh == lowestLow) {
+                    return new BigDecimal(0);
+                }
+
+                result = (highestHigh - close) / (highestHigh - lowestLow) * -100;
+            } break;
+            case "%K": {
+                double currentClose = stocks.getLast().getLastTransactionPrice().doubleValue();
+                double highestHigh = getHighestHighForStocks(stocks);
+                double lowestLow = getLowestLowForStocks(stocks);
+
+                if(highestHigh == lowestLow) {
+                    return new BigDecimal(0);
+                }
+
+                result = (currentClose - lowestLow) / (highestHigh - lowestLow) * 100;
+            } break;
+            case "CCI": {
+                List<Double> typicalPrices = calculateTypicalPricesForGivenStocks(stocks);
+                double SMA = calculateSMAForGivenPrices(typicalPrices);
+                double meanDeviation = calculateMeanDeviationForCCI(typicalPrices, SMA);
+
+                if(meanDeviation == 0) {
+                    return new BigDecimal(0);
+                }
+
+                double lastTP = typicalPrices.getLast();
+
+                result = (lastTP - SMA) / (0.015 * meanDeviation);
+            } break;
+            case "SMA": {
+                List<Double> prices = stocks.stream()
+                        .map(StockDetailsHistory::getLastTransactionPrice)
+                        .mapToDouble(BigDecimal::doubleValue)
+                        .boxed()
+                        .toList();
+                result = calculateSMAForGivenPrices(prices);
+            } break;
+            case "EMA": {
+                int size = stocks.size();
+                double k = 2.0 / (size + 1);
+                double EMA = stocks.getFirst().getLastTransactionPrice().doubleValue();
+                for(StockDetailsHistory stock : stocks) {
+                    EMA = stock.getLastTransactionPrice().doubleValue() * k + (EMA * (1 - k));
+                }
+                result = EMA;
+            } break;
+            case "VWMA": {
+                double totalWeightedPrice = 0;
+                double totalVolume = 0;
+
+                for(StockDetailsHistory stock : stocks) {
+                    totalWeightedPrice += (stock.getLastTransactionPrice().doubleValue() * stock.getQuantity());
+                    totalVolume += stock.getQuantity();
+                }
+
+                result = totalVolume != 0 ? totalWeightedPrice / totalVolume : 0;
+            } break;
+            case "HMA": {
+                List<Double> stockPrices = stocks.stream().map(s -> s.getLastTransactionPrice().doubleValue()).toList();
+                List<Double> rawHMAList = new ArrayList<>();
+                List<Double> hmaList = new ArrayList<>();
+
+                int period = 9;
+                int halfPeriod = (int) (period / 2.0);
+                int sqrtPeriod = (int) Math.sqrt(period);
+
+                for(int i=0; i<stockPrices.size(); i++) {
+                    List<Double> pricesSubList = stockPrices.subList(0, i + 1);
+
+                    double halfWMA = calculateWMA(pricesSubList, halfPeriod);
+                    double fullWMA = calculateWMA(pricesSubList, period);
+                    double rawHMA = 2 * halfWMA - fullWMA;
+
+                    rawHMAList.add(rawHMA);
+
+                    double hma = calculateWMA(rawHMAList, sqrtPeriod);
+                    hmaList.add(hma);
+                }
+
+                result = hmaList.getLast();
+            } break;
+            case "IBL": {
+                double highestHigh = getHighestHighForStocks(stocks);
+                double lowestLow = getLowestLowForStocks(stocks);
+
+                result = (highestHigh + lowestLow) / 2;
+            } break;
+            default: break;
+        }
+
+        // We are returning a BigDecimal object as the result with the decimals rounded on 2 places.
+        return new BigDecimal(result).setScale(2, RoundingMode.DOWN);
+    }
+
+    @Override
+    /* Returns the signal for the oscillator calling the method based on his code. */
+    public String getOscillatorSignal(String code, double value) {
+        String signal = "";
+        /* Every oscillator has different signal calculation */
+        switch (code) {
+            case "RSI": {
+                if(value < 30) {
+                    signal = "Buy";
+                }
+                else if(value > 70) {
+                    signal = "Sell";
+                }
+                else {
+                    signal = "Hold";
+                }
+            } break;
+            case "ROC": {
+                if(value < -5) {
+                    signal = "Sell";
+                }
+                else if(value > 5) {
+                    signal = "Buy";
+                }
+                else {
+                    signal = "Hold";
+                }
+            } break;
+            case "%R": {
+                if(value < -80) {
+                    signal = "Buy";
+                }
+                else if(value > -20) {
+                    signal = "Sell";
+                }
+                else {
+                    signal = "Hold";
+                }
+            } break;
+            case "%K": {
+                if(value < 20) {
+                    signal = "Buy";
+                }
+                else if(value > 80) {
+                    signal = "Sell";
+                }
+                else {
+                    signal = "Hold";
+                }
+            } break;
+            case "CCI": {
+                if(value > 100) {
+                    signal = "Buy";
+                }
+                else if(value < -100) {
+                    signal = "Sell";
+                }
+                else {
+                    signal = "Hold";
+                }
+            } break;
+            default: break;
+        }
+
+        return signal;
+    }
+
+    @Override
+    /* Calculates the RSI value and returns it. Only RSI has its own method
+     * since it has a more complex way of calculating and needs more helper methods. */
+    public BigDecimal calculateRSIValuesByTimeframe(boolean hasEnoughData, int numberOfDays) {
+        if(!hasEnoughData) {
+            return new BigDecimal(-999);
+        }
 
         List<BigDecimal> gains = new ArrayList<>();
         List<BigDecimal> losses = new ArrayList<>();
 
         calculateGainsAndLossesForRSI(gains, losses);
-
-        RSI.setDayValue(calculateRSIValuesByTimeframe(1, RSI.isHasEnoughDayData(), gains, losses));
-        RSI.setWeekValue(calculateRSIValuesByTimeframe(6, RSI.isHasEnoughWeekData(), gains, losses));
-        RSI.setMonthValue(calculateRSIValuesByTimeframe(29, RSI.isHasEnoughMonthData(), gains, losses));
-
-        RSI.setShortTermSignal(getRSISignal(RSI.getWeekValue().doubleValue()));
-        RSI.setLongTermSignal(getRSISignal(RSI.getMonthValue().doubleValue()));
-
-        return RSI;
-    }
-
-    @Override
-    public BigDecimal calculateRSIValuesByTimeframe(int numberOfDays, boolean hasEnoughData, List<BigDecimal> gains, List<BigDecimal> losses) {
-        if(!hasEnoughData) {
-            return new BigDecimal(-999);
-        }
 
         double averageGains = calculateAverageValueForRSI(getLastNValues(gains, numberOfDays));
         double averageLosses = calculateAverageValueForRSI(getLastNValues(losses, numberOfDays));
@@ -110,35 +357,13 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
     }
 
     @Override
-    public void checkIfIssuerHasEnoughStocksForTechnicalIndicator(TechnicalIndicator indicator) {
-        if(this.stocks.size() < 2) {
-            indicator.setHasEnoughDayData(false);
-            indicator.setHasEnoughWeekData(false);
-            indicator.setHasEnoughMonthData(false);
-        }
-        else if(this.stocks.size() < 7) {
-            indicator.setHasEnoughDayData(true);
-            indicator.setHasEnoughWeekData(false);
-            indicator.setHasEnoughMonthData(false);
-        }
-        else if(this.stocks.size() < 30) {
-            indicator.setHasEnoughDayData(true);
-            indicator.setHasEnoughWeekData(true);
-            indicator.setHasEnoughMonthData(false);
-        }
-        else {
-            indicator.setHasEnoughDayData(true);
-            indicator.setHasEnoughWeekData(true);
-            indicator.setHasEnoughMonthData(true);
-        }
-    }
-
-    @Override
+    /* Helper method for RSI. */
     public double calculateAverageValueForRSI(List<BigDecimal> list) {
-        return list.stream().mapToDouble(BigDecimal::doubleValue).sum() / (list.size() + 1);
+        return list.stream().skip(1).mapToDouble(BigDecimal::doubleValue).sum() / (list.size());
     }
 
     @Override
+    /* Helper method for RSI. */
     public void calculateGainsAndLossesForRSI(List<BigDecimal> gains, List<BigDecimal> losses) {
         for(int i=0; i<this.stocks.size(); i++) {
             if(i != 0) {
@@ -162,207 +387,7 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
     }
 
     @Override
-    public String getRSISignal(double value) {
-        if(value < 30) {
-            return "Buy";
-        }
-        else if(value > 70) {
-            return "Sell";
-        }
-        else {
-            return "Hold";
-        }
-    }
-
-    @Override
-    public TechnicalIndicator calculateROC() {
-        TechnicalIndicator ROC = new TechnicalIndicator("Rate of Change (ROC)");
-
-        checkIfIssuerHasEnoughStocksForTechnicalIndicator(ROC);
-
-        ROC.setDayValue(calculateROCValuesByTimeframe(2, ROC.isHasEnoughDayData()));
-        ROC.setWeekValue(calculateROCValuesByTimeframe(7, ROC.isHasEnoughWeekData()));
-        ROC.setMonthValue(calculateROCValuesByTimeframe(30, ROC.isHasEnoughMonthData()));
-
-        ROC.setShortTermSignal(getROCSignal(ROC.getWeekValue().doubleValue()));
-        ROC.setLongTermSignal(getROCSignal(ROC.getMonthValue().doubleValue()));
-
-        return ROC;
-    }
-
-    @Override
-    public BigDecimal calculateROCValuesByTimeframe(int numberOfDays, boolean hasEnoughData) {
-        if(!hasEnoughData) {
-            return new BigDecimal(-999);
-        }
-
-        int size = this.stocks.size();
-        double currentPrice = this.stocks.getLast().getLastTransactionPrice().doubleValue();
-        double previousPrice = this.stocks.get(size - numberOfDays).getLastTransactionPrice().doubleValue();
-        double result = (currentPrice - previousPrice) / previousPrice * 100;
-        return new BigDecimal(result).setScale(2, RoundingMode.DOWN);
-    }
-
-    @Override
-    public String getROCSignal(double value) {
-        if(value < -5) {
-            return "Sell";
-        }
-        else if(value > 5) {
-            return "Buy";
-        }
-        else {
-            return "Hold";
-        }
-    }
-
-    @Override
-    public TechnicalIndicator calculateWPR() {
-        TechnicalIndicator WPR = new TechnicalIndicator("Williams Percent Range (%R)");
-
-        checkIfIssuerHasEnoughStocksForTechnicalIndicator(WPR);
-
-        WPR.setDayValue(calculateWPRValuesByTimeframe(WPR.isHasEnoughDayData(), getLastNStocks(2)));
-        WPR.setWeekValue(calculateWPRValuesByTimeframe(WPR.isHasEnoughWeekData(), getLastNStocks(7)));
-        WPR.setMonthValue(calculateWPRValuesByTimeframe(WPR.isHasEnoughMonthData(), this.stocks));
-
-        WPR.setShortTermSignal(getWPRSignal(WPR.getWeekValue().doubleValue()));
-        WPR.setLongTermSignal(getWPRSignal(WPR.getMonthValue().doubleValue()));
-
-        return WPR;
-    }
-
-    @Override
-    public BigDecimal calculateWPRValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
-        if(!hasEnoughData) {
-            return new BigDecimal(-999);
-        }
-
-        double close = stocks.getLast().getLastTransactionPrice().doubleValue();
-        double highestHigh = 0;
-        double lowestLow = 0;
-
-        for(int i=0; i<stocks.size(); i++) {
-            if(i == 0) {
-                highestHigh = stocks.get(i).getMaxPrice().doubleValue();
-                lowestLow = stocks.get(i).getMinPrice().doubleValue();
-            }
-            else {
-                highestHigh = Double.max(stocks.get(i).getMaxPrice().doubleValue(), highestHigh);
-                lowestLow = Double.min(stocks.get(i).getMaxPrice().doubleValue(), lowestLow);
-            }
-        }
-
-        if(highestHigh == lowestLow) {
-            return new BigDecimal(0);
-        }
-
-        double result = (highestHigh - close) / (highestHigh - lowestLow) * -100;
-        return new BigDecimal(result).setScale(2, RoundingMode.DOWN);
-    }
-
-    @Override
-    public String getWPRSignal(double value) {
-        if(value < -80) {
-            return "Buy";
-        }
-        else if(value > -20) {
-            return "Sell";
-        }
-        else {
-            return "Hold";
-        }
-    }
-
-    @Override
-    public TechnicalIndicator calculateSTO() {
-        TechnicalIndicator STO = new TechnicalIndicator("Stochastic Oscillator (%K)");
-
-        checkIfIssuerHasEnoughStocksForTechnicalIndicator(STO);
-
-        STO.setDayValue(calculateSTOValuesByTimeframe(STO.isHasEnoughDayData(), getLastNStocks(2)));
-        STO.setWeekValue(calculateSTOValuesByTimeframe(STO.isHasEnoughWeekData(), getLastNStocks(7)));
-        STO.setMonthValue(calculateSTOValuesByTimeframe(STO.isHasEnoughMonthData(), this.stocks));
-
-        STO.setShortTermSignal(getSTOSignal(STO.getWeekValue().doubleValue()));
-        STO.setLongTermSignal(getSTOSignal(STO.getMonthValue().doubleValue()));
-
-        return STO;
-    }
-
-    @Override
-    public BigDecimal calculateSTOValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
-        if(!hasEnoughData) {
-            return new BigDecimal(-999);
-        }
-
-        double currentClose = stocks.getLast().getLastTransactionPrice().doubleValue();
-        double highestHigh = stocks.getFirst().getMaxPrice().doubleValue();
-        double lowestLow = stocks.getFirst().getMinPrice().doubleValue();
-
-        for(int i=1; i<stocks.size(); i++) {
-            highestHigh = Math.max(highestHigh, stocks.get(i).getMaxPrice().doubleValue());
-            lowestLow = Math.min(lowestLow, stocks.get(i).getMinPrice().doubleValue());
-        }
-
-        if(highestHigh == lowestLow) {
-            return new BigDecimal(0);
-        }
-
-        double result = (currentClose - lowestLow) / (highestHigh - lowestLow) * 100;
-        return new BigDecimal(result).setScale(2, RoundingMode.DOWN);
-    }
-
-    @Override
-    public String getSTOSignal(double value) {
-        if(value < 20) {
-            return "Buy";
-        }
-        else if(value > 80) {
-            return "Sell";
-        }
-        else {
-            return "Hold";
-        }
-    }
-
-    @Override
-    public TechnicalIndicator calculateCCI() {
-        TechnicalIndicator CCI = new TechnicalIndicator("Commodity Channel Index (CCI)");
-
-        checkIfIssuerHasEnoughStocksForTechnicalIndicator(CCI);
-
-        CCI.setDayValue(calculateCCIValuesByTimeframe(CCI.isHasEnoughDayData(), getLastNStocks(2)));
-        CCI.setWeekValue(calculateCCIValuesByTimeframe(CCI.isHasEnoughDayData(), getLastNStocks(7)));
-        CCI.setMonthValue(calculateCCIValuesByTimeframe(CCI.isHasEnoughDayData(), this.stocks));
-
-        CCI.setShortTermSignal(getCCISignal(CCI.getWeekValue().doubleValue()));
-        CCI.setLongTermSignal(getCCISignal(CCI.getMonthValue().doubleValue()));
-
-        return CCI;
-    }
-
-    @Override
-    public BigDecimal calculateCCIValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
-        if(!hasEnoughData) {
-            return new BigDecimal(-999);
-        }
-
-        List<Double> typicalPrices = calculateTypicalPricesForGivenStocks(stocks);
-        double SMA = calculateSMAForGivenPrices(typicalPrices);
-        double meanDeviation = calculateMeanDeviationForCCI(typicalPrices, SMA);
-
-        if(meanDeviation == 0) {
-            return new BigDecimal(0);
-        }
-
-        double lastTP = typicalPrices.getLast();
-
-        double result = (lastTP - SMA) / (0.015 * meanDeviation);
-        return new BigDecimal(result).setScale(2, RoundingMode.DOWN);
-    }
-
-    @Override
+    /* Helper method for CCI. */
     public double calculateMeanDeviationForCCI(List<Double> typicalPrices, double SMA) {
         int n = typicalPrices.size();
         double sum = 0;
@@ -374,6 +399,8 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
     }
 
     @Override
+    /* Helper method for the indicators that require
+     * typical price calculation inside their formula. */
     public List<Double> calculateTypicalPricesForGivenStocks(List<StockDetailsHistory> stocks) {
         List<Double> typicalPrices = new ArrayList<>();
 
@@ -390,152 +417,10 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
     }
 
     @Override
-    public String getCCISignal(double value) {
-        if(value > 100) {
-            return "Buy";
-        }
-        else if(value < -100) {
-            return "Sell";
-        }
-        else {
-            return "Hold";
-        }
-    }
-
-    @Override
-    public TechnicalIndicator calculateSMA() {
-        TechnicalIndicator SMA = new TechnicalIndicator("Simple Moving Average (SMA)");
-
-        checkIfIssuerHasEnoughStocksForTechnicalIndicator(SMA);
-
-        SMA.setDayValue(calculateSMAValuesByTimeframe(SMA.isHasEnoughDayData(), getLastNStocks(2)));
-        SMA.setWeekValue(calculateSMAValuesByTimeframe(SMA.isHasEnoughDayData(), getLastNStocks(7)));
-        SMA.setMonthValue(calculateSMAValuesByTimeframe(SMA.isHasEnoughDayData(), this.stocks));
-
-        return SMA;
-    }
-
-    @Override
-    public BigDecimal calculateSMAValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
-        if(!hasEnoughData) {
-            return new BigDecimal(-999);
-        }
-
-        List<Double> prices = stocks.stream()
-                .map(StockDetailsHistory::getLastTransactionPrice)
-                .mapToDouble(BigDecimal::doubleValue)
-                .boxed()
-                .toList();
-        double result = calculateSMAForGivenPrices(prices);
-        return new BigDecimal(result).setScale(2, RoundingMode.DOWN);
-    }
-
-    @Override
+    /* Helper method for indicators that require
+     * calculation of SMA inside their formula. */
     public double calculateSMAForGivenPrices(List<Double> prices) {
         return prices.stream().mapToDouble(Double::doubleValue).average().getAsDouble();
-    }
-
-    @Override
-    public TechnicalIndicator calculateEMA() {
-        TechnicalIndicator EMA = new TechnicalIndicator("Exponential Moving Average (EMA)");
-
-        checkIfIssuerHasEnoughStocksForTechnicalIndicator(EMA);
-
-        EMA.setDayValue(calculateEMAValuesByTimeframe(EMA.isHasEnoughDayData(), getLastNStocks(2)));
-        EMA.setWeekValue(calculateEMAValuesByTimeframe(EMA.isHasEnoughWeekData(), getLastNStocks(7)));
-        EMA.setMonthValue(calculateEMAValuesByTimeframe(EMA.isHasEnoughMonthData(), this.stocks));
-
-        return EMA;
-    }
-
-    @Override
-    public BigDecimal calculateEMAValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
-        if(!hasEnoughData) {
-            return new BigDecimal(-999);
-        }
-
-        int size = stocks.size();
-        double k = 2.0 / (size + 1);
-        double EMA = stocks.getFirst().getLastTransactionPrice().doubleValue();
-        for(StockDetailsHistory stock : stocks) {
-            EMA = stock.getLastTransactionPrice().doubleValue() * k + (EMA * (1 - k));
-        }
-
-        return new BigDecimal(EMA).setScale(2, RoundingMode.DOWN);
-    }
-
-    @Override
-    public TechnicalIndicator calculateVWMA() {
-        TechnicalIndicator VWMA = new TechnicalIndicator("Volume Weighted Moving Average (VWMA)");
-
-        checkIfIssuerHasEnoughStocksForTechnicalIndicator(VWMA);
-
-        VWMA.setDayValue(calculateVWMAValuesByTimeframe(VWMA.isHasEnoughDayData(), getLastNStocks(2)));
-        VWMA.setWeekValue(calculateVWMAValuesByTimeframe(VWMA.isHasEnoughWeekData(), getLastNStocks(7)));
-        VWMA.setMonthValue(calculateVWMAValuesByTimeframe(VWMA.isHasEnoughMonthData(), this.stocks));
-
-        return VWMA;
-    }
-
-    @Override
-    public BigDecimal calculateVWMAValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
-        if(!hasEnoughData) {
-            return new BigDecimal(-999);
-        }
-
-        double totalWeightedPrice = 0;
-        double totalVolume = 0;
-
-        for(StockDetailsHistory stock : stocks) {
-            totalWeightedPrice += (stock.getLastTransactionPrice().doubleValue() * stock.getQuantity());
-            totalVolume += stock.getQuantity();
-        }
-
-        double result = totalVolume != 0 ? totalWeightedPrice / totalVolume : 0;
-        return new BigDecimal(result).setScale(2, RoundingMode.DOWN);
-    }
-
-    @Override
-    public TechnicalIndicator calculateHMA() {
-        TechnicalIndicator HMA = new TechnicalIndicator("Hull Moving Average (HMA)");
-
-        checkIfIssuerHasEnoughStocksForTechnicalIndicator(HMA);
-
-        HMA.setDayValue(calculateHMAValuesByTimeframe(HMA.isHasEnoughDayData(), getLastNStocks(2)));
-        HMA.setWeekValue(calculateHMAValuesByTimeframe(HMA.isHasEnoughWeekData(), getLastNStocks(7)));
-        HMA.setMonthValue(calculateHMAValuesByTimeframe(HMA.isHasEnoughMonthData(), this.stocks));
-
-        return HMA;
-    }
-
-    @Override
-    public BigDecimal calculateHMAValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
-        if(!hasEnoughData) {
-            return new BigDecimal(-999);
-        }
-
-        List<Double> stockPrices = stocks.stream().map(s -> s.getLastTransactionPrice().doubleValue()).toList();
-        List<Double> rawHMAList = new ArrayList<>();
-        List<Double> hmaList = new ArrayList<>();
-
-        int period = 9;
-        int halfPeriod = (int) (period / 2.0);
-        int sqrtPeriod = (int) Math.sqrt(period);
-
-        for(int i=0; i<stockPrices.size(); i++) {
-            List<Double> pricesSubList = stockPrices.subList(0, i + 1);
-
-            double halfWMA = calculateWMA(pricesSubList, halfPeriod);
-            double fullWMA = calculateWMA(pricesSubList, period);
-            double rawHMA = 2 * halfWMA - fullWMA;
-
-            rawHMAList.add(rawHMA);
-
-            double hma = calculateWMA(rawHMAList, sqrtPeriod);
-            hmaList.add(hma);
-        }
-
-        return BigDecimal.valueOf(hmaList.getLast()).setScale(2, RoundingMode.DOWN);
     }
 
     @Override
@@ -550,37 +435,7 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
     }
 
     @Override
-    public TechnicalIndicator calculateIBL() {
-        TechnicalIndicator IBL = new TechnicalIndicator("Ichimoku Baseline (IBL)");
-
-        checkIfIssuerHasEnoughStocksForTechnicalIndicator(IBL);
-
-        IBL.setDayValue(calculateIBLValuesByTimeframe(IBL.isHasEnoughDayData(), getLastNStocks(2)));
-        IBL.setWeekValue(calculateIBLValuesByTimeframe(IBL.isHasEnoughWeekData(), getLastNStocks(7)));
-        IBL.setMonthValue(calculateIBLValuesByTimeframe(IBL.isHasEnoughMonthData(), this.stocks));
-
-        return IBL;
-    }
-
-    @Override
-    public BigDecimal calculateIBLValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
-        if(!hasEnoughData) {
-            return new BigDecimal(-999);
-        }
-
-        double highestHigh = stocks.getFirst().getMaxPrice().doubleValue();
-        double lowestLow = stocks.getFirst().getMinPrice().doubleValue();
-
-        for(int i=1; i<stocks.size(); i++) {
-            highestHigh = Math.max(highestHigh, stocks.get(i).getMaxPrice().doubleValue());
-            lowestLow = Math.min(lowestLow, stocks.get(i).getMinPrice().doubleValue());
-        }
-
-        double result = (highestHigh + lowestLow) / 2;
-        return new BigDecimal(result).setScale(2, RoundingMode.DOWN);
-    }
-
-    @Override
+    /* This method sums up the signal based on the indicators and on the timeframe (short, long). */
     public String getSignalFromIndicatorsByTimeframe(double currentPrice, double smaValue, double emaValue, double hmaValue, double vwmaValue, double ichimokuBaselineValue) {
         if(smaValue == 0) {
             return "Hold";
@@ -610,6 +465,8 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
     }
 
     @Override
+    /* This method sums up the final signal by combining and comparing the
+     * 5 oscillator signals and the one signal for the 5 indicators together. */
     public String getFinalSignalByTimeframe(int timeframe, int numberOfStocksAvailable, List<TechnicalIndicator> indicatorsList, List<TechnicalIndicator> oscillatorsList) {
         if(numberOfStocksAvailable < timeframe) {
             return "Not Available";
@@ -629,20 +486,20 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
         if(timeframe == 7) {
             indicatorsSignal = getSignalFromIndicatorsByTimeframe(
                     this.stocks.getLast().getLastTransactionPrice().doubleValue(),
-                    indicatorsList.get(0).getWeekValue().doubleValue(),
-                    indicatorsList.get(1).getWeekValue().doubleValue(),
-                    indicatorsList.get(2).getWeekValue().doubleValue(),
-                    indicatorsList.get(3).getWeekValue().doubleValue(),
-                    indicatorsList.get(4).getWeekValue().doubleValue());
+                    indicatorsList.get(0).getValueByWeek().doubleValue(),
+                    indicatorsList.get(1).getValueByWeek().doubleValue(),
+                    indicatorsList.get(2).getValueByWeek().doubleValue(),
+                    indicatorsList.get(3).getValueByWeek().doubleValue(),
+                    indicatorsList.get(4).getValueByWeek().doubleValue());
         }
         else {
             indicatorsSignal = getSignalFromIndicatorsByTimeframe(
                     this.stocks.getLast().getLastTransactionPrice().doubleValue(),
-                    indicatorsList.get(0).getMonthValue().doubleValue(),
-                    indicatorsList.get(1).getMonthValue().doubleValue(),
-                    indicatorsList.get(2).getMonthValue().doubleValue(),
-                    indicatorsList.get(3).getMonthValue().doubleValue(),
-                    indicatorsList.get(4).getMonthValue().doubleValue());
+                    indicatorsList.get(0).getValueByMonth().doubleValue(),
+                    indicatorsList.get(1).getValueByMonth().doubleValue(),
+                    indicatorsList.get(2).getValueByMonth().doubleValue(),
+                    indicatorsList.get(3).getValueByMonth().doubleValue(),
+                    indicatorsList.get(4).getValueByMonth().doubleValue());
         }
 
         Map<String, Integer> signalsMap = new HashMap<>();
@@ -681,6 +538,8 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
     }
 
     @Override
+    /* This method returns a list of two signals,
+     * one for short term trading and one for long term. */
     public List<String> getFinalSignalsList(Long companyId) {
         List<String> finalSignals = new ArrayList<>();
         this.stocks = this.stockDetailsService.findLast30ByCompanyId(companyId);

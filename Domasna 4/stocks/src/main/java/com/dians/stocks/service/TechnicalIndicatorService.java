@@ -7,42 +7,25 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface TechnicalIndicatorService {
+    /* Short explanation for the methods that need one is located
+     * above the method implementations in the service implementation. */
     List<TechnicalIndicator> getTechnicalIndicators(Long companyId);
     List<TechnicalIndicator> getTechnicalOscillators(Long companyId);
-    List<StockDetailsHistory> getLastNStocks(int count);
-    List<BigDecimal> getLastNValues(List<BigDecimal> list, int count);
-    void checkIfIssuerHasEnoughStocksForTechnicalIndicator(TechnicalIndicator indicator);
-    TechnicalIndicator calculateRSI();
-    TechnicalIndicator calculateROC();
-    TechnicalIndicator calculateWPR();
-    TechnicalIndicator calculateSTO();
-    TechnicalIndicator calculateCCI();
-    TechnicalIndicator calculateSMA();
-    TechnicalIndicator calculateEMA();
-    TechnicalIndicator calculateVWMA();
-    TechnicalIndicator calculateHMA();
-    TechnicalIndicator calculateIBL();
-    String getRSISignal(double value);
-    String getROCSignal(double value);
-    String getWPRSignal(double value);
-    String getSTOSignal(double value);
-    String getCCISignal(double value);
-    double calculateAverageValueForRSI(List<BigDecimal> list);
-    void calculateGainsAndLossesForRSI(List<BigDecimal> gains, List<BigDecimal> losses);
-    double calculateWMA(List<Double> stockPrices, int period);
-    BigDecimal calculateRSIValuesByTimeframe(int numberOfDays, boolean hasEnoughData, List<BigDecimal> gains, List<BigDecimal> losses);
-    BigDecimal calculateROCValuesByTimeframe(int numberOfDays, boolean hasEnoughData);
-    BigDecimal calculateWPRValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks);
-    BigDecimal calculateSTOValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks);
-    BigDecimal calculateCCIValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks);
-    BigDecimal calculateSMAValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks);
-    BigDecimal calculateEMAValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks);
-    BigDecimal calculateVWMAValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks);
-    BigDecimal calculateHMAValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks);
-    BigDecimal calculateIBLValuesByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks);
-    double calculateMeanDeviationForCCI(List<Double> typicalPrices, double SMA);
-    List<Double> calculateTypicalPricesForGivenStocks(List<StockDetailsHistory> stocks);
-    double calculateSMAForGivenPrices(List<Double> prices);
+    void setValuesForIndicator(TechnicalIndicator indicator);
+    List<StockDetailsHistory> getLastNStocks(int count); // done
+    String getOscillatorSignal(String code, double value);
+    List<BigDecimal> getLastNValues(List<BigDecimal> list, int count); // done
+    void checkIfIssuerHasEnoughStocksForTechnicalIndicator(TechnicalIndicator indicator); //
+    double getHighestHighForStocks(List<StockDetailsHistory> stocks); //
+    double getLowestLowForStocks(List<StockDetailsHistory> stocks); //
+    BigDecimal calculateIndicatorValueByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks, String code);
+    double calculateAverageValueForRSI(List<BigDecimal> list); //
+    void calculateGainsAndLossesForRSI(List<BigDecimal> gains, List<BigDecimal> losses); //
+    double calculateWMA(List<Double> stockPrices, int period); //
+    BigDecimal calculateRSIValuesByTimeframe(boolean hasEnoughData, int numberOfDays);
+    double calculateMeanDeviationForCCI(List<Double> typicalPrices, double SMA); //
+    List<Double> calculateTypicalPricesForGivenStocks(List<StockDetailsHistory> stocks); //
+    double calculateSMAForGivenPrices(List<Double> prices); //
     String getSignalFromIndicatorsByTimeframe(double currentPrice, double smaValue, double emaValue, double hmaValue, double vwmaValue, double ichimokuBaselineValue);
     String getFinalSignalByTimeframe(int timeframe, int numberOfStocksAvailable, List<TechnicalIndicator> indicatorsList, List<TechnicalIndicator> oscillatorsList);
     List<String> getFinalSignalsList(Long companyId);

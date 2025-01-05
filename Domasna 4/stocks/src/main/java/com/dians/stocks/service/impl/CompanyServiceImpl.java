@@ -2,9 +2,9 @@ package com.dians.stocks.service.impl;
 
 import com.dians.stocks.domain.Company;
 import com.dians.stocks.dto.CompanyDTO;
+import com.dians.stocks.mapper.DTOMapper;
 import com.dians.stocks.repository.CompanyRepository;
 import com.dians.stocks.service.CompanyService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +12,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class CompanyServiceImpl implements CompanyService {
   private final CompanyRepository companyRepository;
+  private final DTOMapper dtoMapper;
 
-  @Override
-  public Page<CompanyDTO> findAllCompaniesDTO(String sort, int page, int pageSize) {
+  public CompanyServiceImpl(CompanyRepository companyRepository, DTOMapper dtoMapper) {
+    this.companyRepository = companyRepository;
+    this.dtoMapper = dtoMapper;
+  }
+
+  /* We are using this method to create a Pageable object
+   * with the given sort method, page number and page size.
+   * The method is static because it is used in StockDetailsServiceImpl
+   * in order to cut the duplicate code we had in these two services. */
+  static Pageable getPageableObject(String sort, int page, int pageSize) {
     String sortBy = sort.split("-")[0];
     String order = sort.split("-")[1];
 
@@ -29,17 +37,26 @@ public class CompanyServiceImpl implements CompanyService {
       pageable = PageRequest.of(page, pageSize, Sort.by(sortBy).descending());
     }
 
+    return pageable;
+  }
+
+  @Override
+  /* Gets a page of all the companies from the repository,
+  maps them to DTO, sorts them and returns the new page. */
+  public Page<CompanyDTO> findAllCompaniesDTOToPage(String sort, int page, int pageSize) {
+    Pageable pageable = getPageableObject(sort, page, pageSize);
+
     Page<Company> companiesPage = this.companyRepository.findAll(pageable);
     List<CompanyDTO> companiesList = companiesPage
-        .stream()
-        .map(this::convertToCompanyDTO).collect(Collectors.toList());
+            .stream()
+            .map(dtoMapper::convertToCompanyDTO).collect(Collectors.toList());
 
     return new PageImpl<>(companiesList, companiesPage.getPageable(), companiesPage.getTotalElements());
   }
 
   @Override
-  public Optional<Company> save(Company company) {
-    return Optional.of(this.companyRepository.save(company));
+  public void save(Company company) {
+    this.companyRepository.save(company);
   }
 
   @Override
@@ -53,10 +70,11 @@ public class CompanyServiceImpl implements CompanyService {
   }
 
   @Override
+  /* Finds company using the id, maps it to DTO and returns it. */
   public CompanyDTO findByIdToDTO(Long id) {
     return this.companyRepository.findById(id)
-        .map(this::convertToCompanyDTO)
-        .orElseThrow(RuntimeException::new);
+            .map(dtoMapper::convertToCompanyDTO)
+            .orElseThrow(RuntimeException::new);
   }
 
   @Override
@@ -64,23 +82,13 @@ public class CompanyServiceImpl implements CompanyService {
     this.companyRepository.deleteById(id);
   }
 
-  // Vo mapper
   @Override
-  public CompanyDTO convertToCompanyDTO(Company company) {
-    return new CompanyDTO()
-        .builder()
-        .companyId(company.getId())
-        .code(company.getCode())
-        .name(company.getName())
-        .latestTurnoverDate(company.getLatestWrittenDate())
-        .build();
-  }
-
-  @Override
-  public List<CompanyDTO> getAllCompaniesDTO() {
+  /* Finds all companies from the database,
+   * maps them to DTO and returns a list of them all. */
+  public List<CompanyDTO> findAllCompaniesDTO() {
     return this.companyRepository.findAll()
-        .stream()
-        .map(this::convertToCompanyDTO).collect(Collectors.toList());
+            .stream()
+            .map(dtoMapper::convertToCompanyDTO).collect(Collectors.toList());
   }
 
 }
