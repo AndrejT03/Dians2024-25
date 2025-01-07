@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DTOMapper {
+    // These methods are pretty much self-explanatory
 
     public CompanyDTO convertToCompanyDTO(Company company) {
         return new CompanyDTO()

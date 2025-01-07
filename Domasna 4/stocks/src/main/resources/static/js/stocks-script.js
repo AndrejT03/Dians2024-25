@@ -107,25 +107,25 @@ $(document).ready(function() {
     }
 
     /* This function sends an API GET request with company id parameter to StocksController
-    *  and in the response body expects the technical indicators for the stocks based on the company id.
-    * The function then proceeds to update the indicators table on the front-end with the information from the response.*/
-    function fetchTechnicalIndicatorsData() {
-        fetch(`/api/stocks/technical-indicators?companyId=${companyId}`)
+    *  and in the response body expects the trend indicators for the stocks based on the company id.
+    * The function then proceeds to update the table on the front-end with the information from the response.*/
+    function fetchTrendIndicatorsData() {
+        fetch(`/api/stocks/trend-indicators?companyId=${companyId}`)
             .then(response => response.json())
             .then(data => {
-                const tableBody = document.querySelector("#indicatorsTable tbody");
+                const tableBody = document.querySelector("#trendIndicatorsTable tbody");
                 writeTechnicalAnalysisTableRows(data, tableBody);
             });
     }
 
     /* This function sends an API GET request with company id parameter to StocksController
-    *  and in the response body expects the technical oscillators for the stocks based on the company id.
-    * The function then proceeds to update the oscillators table on the front-end with the information from the response.*/
-    function fetchTechnicalOscillatorsData() {
-        fetch(`/api/stocks/technical-oscillators?companyId=${companyId}`)
+    *  and in the response body expects the momentum indicators for the stocks based on the company id.
+    * The function then proceeds to update the table on the front-end with the information from the response.*/
+    function fetchMomentumIndicatorsData() {
+        fetch(`/api/stocks/momentum-indicators?companyId=${companyId}`)
             .then(response => response.json())
             .then(data => {
-                const tableBody = document.querySelector("#oscillatorsTable tbody");
+                const tableBody = document.querySelector("#momentumIndicatorsTable tbody");
                 writeTechnicalAnalysisTableRows(data, tableBody);
             });
     }
@@ -198,8 +198,8 @@ $(document).ready(function() {
     instantly after the document is ready (during the page load). */
     fetchCompaniesDropdownData();
     fetchStocksTableData();
-    fetchTechnicalIndicatorsData();
-    fetchTechnicalOscillatorsData();
+    fetchTrendIndicatorsData();
+    fetchMomentumIndicatorsData();
     fetchSignals();
 
     // Also initially we create an empty canvas in order to paint it with the stocks chart.
@@ -223,8 +223,8 @@ $(document).ready(function() {
         fetchGraphYearsAvailable().then(() => {
             loadChart();
         });
-        fetchTechnicalIndicatorsData();
-        fetchTechnicalOscillatorsData();
+        fetchTrendIndicatorsData();
+        fetchMomentumIndicatorsData();
         fetchSignals();
     });
 

@@ -1,6 +1,5 @@
 package com.dians.stocks.datascraper.filters.impl;
 
-import com.dians.stocks.domain.Company;
 import com.dians.stocks.service.CompanyService;
 import com.dians.stocks.service.StockDetailsService;
 import org.springframework.stereotype.Component;
@@ -18,6 +17,10 @@ public class DateFilter extends WriteFilter{
   }
 
   @Override
+  /* This method checks if a company has existing stock data in the database.
+   * If the company has data, it gets the latest stock date and updates the map from the first filter
+   * and if the company doesn't have data, it updates the table with the latest stocks and also
+   * updates the map from the first filter with the latest stock date. */
   public Map<String, String> execute(Map<String, String> codesAndDates) throws IOException {
     String todaysformattedDate = getTodaysFormattedDate();
 

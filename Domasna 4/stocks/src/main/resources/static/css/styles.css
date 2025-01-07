@@ -81,8 +81,8 @@ body {
 
 #companiesTable thead th,
 #stocksTable thead th,
-#indicatorsTable thead th,
-#oscillatorsTable thead th,
+#trendIndicatorsTable thead th,
+#momentumIndicatorsTable thead th,
 #signalsTable thead th {
     background-color: #466cd9;
     color: #fff;

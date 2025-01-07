@@ -19,6 +19,7 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @GetMapping
+        // Returns a page of companies based on the request parameters.
     ResponseEntity<Map<String, Object>> getCompanies(@RequestParam int page,
                                                      @RequestParam int pageSize,
                                                      @RequestParam String sort) {
@@ -30,6 +31,7 @@ public class CompanyController {
     }
 
     @GetMapping("/all")
+    // Returns all available company codes from the database.
     public ResponseEntity<List<CompanyDTO>> getAllCompanyCodes() {
         return ResponseEntity.ok().body(this.companyService.findAllCompaniesDTO());
     }

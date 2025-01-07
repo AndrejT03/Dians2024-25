@@ -10,6 +10,7 @@ public class PageController {
 
   @GetMapping
   @RequestMapping(value = {"", "/", "/home", "/companies"})
+  // Returns the static Companies page.
   public String getCompaniesPage(Model model) {
     model.addAttribute("title", "Companies");
     model.addAttribute("bodyContent", "Companies");
@@ -17,6 +18,7 @@ public class PageController {
   }
 
   @GetMapping("/stocks")
+  // Returns the static Stocks page.
   public String getStocksPage(Model model) {
     model.addAttribute("title", "Stocks");
     model.addAttribute("bodyContent", "stocks");

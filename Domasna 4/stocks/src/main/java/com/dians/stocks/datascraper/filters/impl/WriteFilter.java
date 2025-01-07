@@ -16,6 +16,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Component
+/* Serves as an abstract class for a guided functionality for the filters that
+ * write data in the database, but also has important already implemented methods that
+ * the filters are using during their writing to the database. */
 public abstract class WriteFilter implements IFilter<String, String> {
   static final String url = "https://www.mse.mk/mk/stats/symbolhistory/";
   private final StockDetailsService stockDetailsService;
@@ -29,6 +32,7 @@ public abstract class WriteFilter implements IFilter<String, String> {
   @Override
   public abstract Map<String, String> execute(Map<String, String> map) throws IOException;
 
+  // Writes rows in the table for a given company
   public void writeRows(Long companyId, String code, String queryString) throws IOException {
     Document doc = Jsoup.connect(String.format("%s%s%s", url, code, queryString)).get();
     Elements rowElements = doc.select("#resultsTable tbody tr");
@@ -63,21 +67,26 @@ public abstract class WriteFilter implements IFilter<String, String> {
     });
   }
 
+  // Replaces the price format "#.###,00" to "####.00"
   public String stringToBigDecimalFormat(String number) {
     return number.replace(".", "").replace(",", ".");
   }
 
+  // Parses the given date string to format "d.M.yyyy"
   public LocalDate parseStringToLocalDate(String dateString) {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d.M.yyyy");
     return LocalDate.parse(dateString, formatter);
   }
 
+  // Returns today's date in format "d.M.yyyy"
   public String getTodaysFormattedDate() {
     LocalDate today = LocalDate.now();
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d.M.yyyy");
     return today.format(formatter);
   }
 
+  /* Creates a query string from the given function parameters
+   * that we use for getting the needed page for scraping on the internet. */
   public String getQueryString(boolean lastCycle, int fromDay, int toDay, int fromMonth, int toMonth, int fromYear, int toYear, String code) {
     String startingFormattedDate = String.format("%d.%d.%d", fromDay, fromMonth, fromYear);
     if(lastCycle) {

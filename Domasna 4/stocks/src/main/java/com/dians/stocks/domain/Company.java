@@ -16,16 +16,11 @@ public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(nullable = false)
     private String code;
-
     private String name;
-
     private String latestWrittenDate;
-
     private boolean isStockHistoryEmpty;
-
     @OneToMany(mappedBy = "company")
     private List<StockDetailsHistory> stockHistory;
 

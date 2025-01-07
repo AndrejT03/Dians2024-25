@@ -15,6 +15,9 @@ public class InformationFilter extends WriteFilter {
   }
 
   @Override
+  /* This method is important when we run the web scraper for a second or N-th time.
+   * It updates the missing data for each company for each new day that has passed from the
+   * latest updated stock data to the moment that we run the web scraper. */
   public Map<String, String> execute(Map<String, String> codeDateMap) throws IOException {
     String todaysFormattedDate = getTodaysFormattedDate();
 

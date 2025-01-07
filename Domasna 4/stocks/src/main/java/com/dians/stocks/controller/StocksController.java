@@ -31,6 +31,7 @@ public class StocksController {
 
   @GetMapping
   @Transactional
+  // Returns a page of stocks based on the request parameters.
   public ResponseEntity<Map<String, Object>> getStocks(@RequestParam Long companyId,
                                                        @RequestParam int page,
                                                        @RequestParam int pageSize,
@@ -44,27 +45,32 @@ public class StocksController {
   }
 
   @GetMapping("/graph")
+  // Returns a list of StockGraphDTO based on the request parameters.
   public ResponseEntity<List<StockGraphDTO>> getStocksForGraph(@RequestParam Long companyId,
                                                                @RequestParam Integer year) {
     return ResponseEntity.ok().body(this.stockDetailsService.findAllStockGraphDTOByCompanyIdAndYear(companyId, year));
   }
 
   @GetMapping("/graph-years")
+  // Returns a list of all stock years available for a given company.
   public ResponseEntity<List<Integer>> getYearsForGraph(@RequestParam Long companyId) {
     return ResponseEntity.ok().body(this.stockDetailsService.findGraphYearsAvailable(companyId));
   }
 
-  @GetMapping("/technical-indicators")
-  public ResponseEntity<List<TechnicalIndicator>> getTechnicalIndicators(@RequestParam Long companyId) {
-    return ResponseEntity.ok().body(this.technicalIndicatorService.getTechnicalIndicators(companyId));
+  @GetMapping("/trend-indicators")
+  // Returns a list of the trend indicators for the stock of a given company.
+  public ResponseEntity<List<TechnicalIndicator>> getTrendIndicators(@RequestParam Long companyId) {
+    return ResponseEntity.ok().body(this.technicalIndicatorService.getTrendIndicators(companyId));
   }
 
-  @GetMapping("/technical-oscillators")
-  public ResponseEntity<List<TechnicalIndicator>> getTechnicalOscillators(@RequestParam Long companyId) {
-    return ResponseEntity.ok().body(this.technicalIndicatorService.getTechnicalOscillators(companyId));
+  @GetMapping("/momentum-indicators")
+  // Returns a list of the momentum indicators for the stock of a given company.
+  public ResponseEntity<List<TechnicalIndicator>> getMomentumIndicators(@RequestParam Long companyId) {
+    return ResponseEntity.ok().body(this.technicalIndicatorService.getMomentumIndicators(companyId));
   }
 
   @GetMapping("/signals")
+  // Returns the signals for the stock of a given company.
   public ResponseEntity<List<String>> getSignals(@RequestParam Long companyId) {
     return ResponseEntity.ok().body(this.technicalIndicatorService.getFinalSignalsList(companyId));
   }

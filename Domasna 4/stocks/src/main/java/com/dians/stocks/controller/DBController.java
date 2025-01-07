@@ -13,12 +13,12 @@ public class DBController {
     }
 
     @PostMapping("/api/update-database")
+    /* Starts the creation and execution of the filters inside
+
+the pipe in order to create or update the tables in the database. */
     public void updateDatabase() {
         try {
             pipe.createFilters();
-            pipe.executeFilters();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+            pipe.executeFilters();} catch (Exception e) {
+            e.printStackTrace();}}
 }
