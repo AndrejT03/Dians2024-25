@@ -202,7 +202,7 @@ $(document).ready(function() {
     fetchMomentumIndicatorsData();
     fetchSignals();
 
-    // Also initially we create an empty canvas in order to paint it with the stocks chart.
+    // Initially we create an empty canvas in order to paint it with the stocks chart.
     const canvas = document.getElementById("chart");
     const canvasCtx = canvas.getContext('2d');
     let chartObj = null;

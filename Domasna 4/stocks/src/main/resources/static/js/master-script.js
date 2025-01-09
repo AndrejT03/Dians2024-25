@@ -1,7 +1,6 @@
 $(document).ready(function() {
     /* This next function is an event listener that sends an API POST request to DBController
-    * whose job is to activate the Web Scraper implemented using a Pipe and Filter architecture. With that we
-    * update the database with the newest stocks information. */
+    * whose job is to communicate with data-service (microservice) and start the updating database process. */
     document.getElementById("btnUpdateDb").addEventListener("click", function() {
         const updatingMessage = document.getElementById("dbUpdatingStarted");
         updatingMessage.style.display = 'block';

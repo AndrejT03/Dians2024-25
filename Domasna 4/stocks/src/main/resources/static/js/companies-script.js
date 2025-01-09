@@ -9,7 +9,7 @@ $(document).ready(function() {
     * and a total page count inside the response body in order to enable/disable the pagination buttons and create
     * table rows with the company information on the client side. */
     function fetchTableData() {
-        fetch(`/api/companies/?page=${currentPage}&pageSize=${pageSize}&sort=${sort}`)
+        fetch(`/api/companies?page=${currentPage}&pageSize=${pageSize}&sort=${sort}`)
             .then(response => response.json())
             .then(data => {
                 let companies = data.companies;

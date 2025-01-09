@@ -64,11 +64,12 @@ body {
 }
 
 #bodyContentContainer {
-    min-height: 80%; background-color: #fefefe;
+    min-height: 80vh; background-color: #fefefe;
 }
 
 #footerContainer {
     min-height: 10vh;
+    overflow: hidden;
 }
 
 #headerText {
