@@ -1,6 +1,6 @@
-package com.dians.stocks.factory.helpers;
+package com.dians.technical_indicators.factory.helpers;
 
-import com.dians.stocks.domain.StockDetailsHistory;
+import com.dians.technical_indicators.domain.StockValues;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +8,10 @@ import java.util.List;
 public class CCIHelper {
 
     // Calculates typical prices for a given list of stocks.
-    public static List<Double> calculateTypicalPricesForGivenStocks(List<StockDetailsHistory> stocks) {
+    public static List<Double> calculateTypicalPricesForGivenStocks(List<StockValues> stocks) {
         List<Double> typicalPrices = new ArrayList<>();
 
-        for(StockDetailsHistory stock : stocks) {
+        for(StockValues stock : stocks) {
             double high = stock.getMaxPrice().doubleValue();
             double close = stock.getLastTransactionPrice().doubleValue();
             double low = stock.getMinPrice().doubleValue();

@@ -1,9 +1,9 @@
-package com.dians.stocks.factory;
+package com.dians.technical_indicators.factory;
 
-import com.dians.stocks.domain.StockDetailsHistory;
-import com.dians.stocks.domain.TechnicalIndicator;
-import com.dians.stocks.factory.helpers.HMAHelper;
-import com.dians.stocks.factory.helpers.IndicatorHelper;
+import com.dians.technical_indicators.domain.StockValues;
+import com.dians.technical_indicators.domain.TechnicalIndicator;
+import com.dians.technical_indicators.factory.helpers.HMAHelper;
+import com.dians.technical_indicators.factory.helpers.IndicatorHelper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public class TrendIndicatorFactory extends TechnicalIndicatorFactory {
 
-    public TrendIndicatorFactory(List<StockDetailsHistory> stocks) {
+    public TrendIndicatorFactory(List<StockValues> stocks) {
         super(stocks);
     }
 
@@ -60,13 +60,13 @@ public class TrendIndicatorFactory extends TechnicalIndicatorFactory {
      * their correct value calculation. */
 
     // Calculates SMA for a given timeframe.
-    private BigDecimal getSMAValueByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
+    private BigDecimal getSMAValueByTimeframe(boolean hasEnoughData, List<StockValues> stocks) {
         if(!hasEnoughData) {
             return new BigDecimal(-999);
         }
 
         List<Double> prices = stocks.stream()
-                .map(StockDetailsHistory::getLastTransactionPrice)
+                .map(StockValues::getLastTransactionPrice)
                 .mapToDouble(BigDecimal::doubleValue)
                 .boxed()
                 .toList();
@@ -75,7 +75,7 @@ public class TrendIndicatorFactory extends TechnicalIndicatorFactory {
     }
 
     // Calculates EMA for a given timeframe.
-    private BigDecimal getEMAValueByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
+    private BigDecimal getEMAValueByTimeframe(boolean hasEnoughData, List<StockValues> stocks) {
         if(!hasEnoughData) {
             return new BigDecimal(-999);
         }
@@ -83,7 +83,7 @@ public class TrendIndicatorFactory extends TechnicalIndicatorFactory {
         int size = stocks.size();
         double k = 2.0 / (size + 1);
         double EMA = stocks.getFirst().getLastTransactionPrice().doubleValue();
-        for(StockDetailsHistory stock : stocks) {
+        for(StockValues stock : stocks) {
             EMA = stock.getLastTransactionPrice().doubleValue() * k + (EMA * (1 - k));
         }
 
@@ -91,7 +91,7 @@ public class TrendIndicatorFactory extends TechnicalIndicatorFactory {
     }
 
     // Calculates VWMA for a given timeframe.
-    private BigDecimal getVWMAValueByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
+    private BigDecimal getVWMAValueByTimeframe(boolean hasEnoughData, List<StockValues> stocks) {
         if(!hasEnoughData) {
             return new BigDecimal(-999);
         }
@@ -99,7 +99,7 @@ public class TrendIndicatorFactory extends TechnicalIndicatorFactory {
         double totalWeightedPrice = 0;
         double totalVolume = 0;
 
-        for(StockDetailsHistory stock : stocks) {
+        for(StockValues stock : stocks) {
             totalWeightedPrice += (stock.getLastTransactionPrice().doubleValue() * stock.getQuantity());
             totalVolume += stock.getQuantity();
         }
@@ -109,7 +109,7 @@ public class TrendIndicatorFactory extends TechnicalIndicatorFactory {
     }
 
     // Calculates HMA for a given timeframe.
-    private BigDecimal getHMAValueByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
+    private BigDecimal getHMAValueByTimeframe(boolean hasEnoughData, List<StockValues> stocks) {
         if(!hasEnoughData) {
             return new BigDecimal(-999);
         }
@@ -139,7 +139,7 @@ public class TrendIndicatorFactory extends TechnicalIndicatorFactory {
     }
 
     // Calculates IBL for a given timeframe.
-    private BigDecimal getIBLValueByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
+    private BigDecimal getIBLValueByTimeframe(boolean hasEnoughData, List<StockValues> stocks) {
         if(!hasEnoughData) {
             return new BigDecimal(-999);
         }

@@ -1,6 +1,7 @@
-package com.dians.stocks.factory.helpers;
+package com.dians.technical_indicators.factory.helpers;
 
-import com.dians.stocks.domain.StockDetailsHistory;
+
+import com.dians.technical_indicators.domain.StockValues;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,7 +14,7 @@ public class RSIHelper {
         return list.stream().skip(1).mapToDouble(BigDecimal::doubleValue).sum() / (list.size());}
 
     // Calculates gains and losses for each day of the given stocks.
-    public static void calculateGainsAndLossesForRSI(List<StockDetailsHistory> stocks, List<BigDecimal> gains, List<BigDecimal> losses) {
+    public static void calculateGainsAndLossesForRSI(List<StockValues> stocks, List<BigDecimal> gains, List<BigDecimal> losses) {
         for(int i=0; i<stocks.size(); i++) {
             if(i != 0) {
                 BigDecimal prevPrice = stocks.get(i - 1).getLastTransactionPrice();

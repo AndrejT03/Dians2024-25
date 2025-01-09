@@ -2,9 +2,10 @@ package com.dians.stocks.mapper;
 
 import com.dians.stocks.domain.Company;
 import com.dians.stocks.domain.StockDetailsHistory;
-import com.dians.stocks.dto.CompanyDTO;
-import com.dians.stocks.dto.StockDTO;
-import com.dians.stocks.dto.StockGraphDTO;
+import com.dians.stocks.helper_models.microservice.StockValues;
+import com.dians.stocks.helper_models.dto.CompanyDTO;
+import com.dians.stocks.helper_models.dto.StockDTO;
+import com.dians.stocks.helper_models.dto.StockGraphDTO;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -43,5 +44,15 @@ public class DTOMapper {
                 .date(stock.getDate())
                 .price(stock.getLastTransactionPrice())
                 .build();
+    }
+
+    public StockValues convertToStockValues(StockDetailsHistory stock) {
+        return new StockValues()
+            .builder()
+            .lastTransactionPrice(stock.getLastTransactionPrice())
+            .maxPrice(stock.getMaxPrice())
+            .minPrice(stock.getMinPrice())
+            .quantity(stock.getQuantity())
+            .build();
     }
 }

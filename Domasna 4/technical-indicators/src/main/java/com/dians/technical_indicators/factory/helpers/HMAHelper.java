@@ -1,4 +1,4 @@
-package com.dians.stocks.factory.helpers;
+package com.dians.technical_indicators.factory.helpers;
 
 import java.util.List;
 

@@ -1,10 +1,10 @@
-package com.dians.stocks.factory;
+package com.dians.technical_indicators.factory;
 
-import com.dians.stocks.domain.StockDetailsHistory;
-import com.dians.stocks.domain.TechnicalIndicator;
-import com.dians.stocks.factory.helpers.CCIHelper;
-import com.dians.stocks.factory.helpers.IndicatorHelper;
-import com.dians.stocks.factory.helpers.RSIHelper;
+import com.dians.technical_indicators.domain.StockValues;
+import com.dians.technical_indicators.domain.TechnicalIndicator;
+import com.dians.technical_indicators.factory.helpers.CCIHelper;
+import com.dians.technical_indicators.factory.helpers.IndicatorHelper;
+import com.dians.technical_indicators.factory.helpers.RSIHelper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MomentumIndicatorFactory extends TechnicalIndicatorFactory {
-    public MomentumIndicatorFactory(List<StockDetailsHistory> stocks) {
+    public MomentumIndicatorFactory(List<StockValues> stocks) {
         super(stocks);
     }
 
@@ -89,7 +89,7 @@ public class MomentumIndicatorFactory extends TechnicalIndicatorFactory {
     }
 
     // Calculates ROC by given timeframe
-    private BigDecimal getROCValueByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
+    private BigDecimal getROCValueByTimeframe(boolean hasEnoughData, List<StockValues> stocks) {
         if(!hasEnoughData) {
             return new BigDecimal(-999);
         }
@@ -101,7 +101,7 @@ public class MomentumIndicatorFactory extends TechnicalIndicatorFactory {
     }
 
     // Calculates WPR (%R) by given timeframe.
-    private BigDecimal getWPRValueByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
+    private BigDecimal getWPRValueByTimeframe(boolean hasEnoughData, List<StockValues> stocks) {
         if(!hasEnoughData) {
             return new BigDecimal(-999);
         }
@@ -119,7 +119,7 @@ public class MomentumIndicatorFactory extends TechnicalIndicatorFactory {
     }
 
     // Calculates STO (%K) by given timeframe.
-    private BigDecimal getSTOValueByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
+    private BigDecimal getSTOValueByTimeframe(boolean hasEnoughData, List<StockValues> stocks) {
         if(!hasEnoughData) {
             return new BigDecimal(-999);
         }
@@ -137,7 +137,7 @@ public class MomentumIndicatorFactory extends TechnicalIndicatorFactory {
     }
 
     // Calculates CCI by given timeframe.
-    private BigDecimal getCCIValueByTimeframe(boolean hasEnoughData, List<StockDetailsHistory> stocks) {
+    private BigDecimal getCCIValueByTimeframe(boolean hasEnoughData, List<StockValues> stocks) {
         if(!hasEnoughData) {
             return new BigDecimal(-999);
         }

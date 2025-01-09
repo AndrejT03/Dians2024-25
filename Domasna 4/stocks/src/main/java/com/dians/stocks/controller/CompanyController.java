@@ -1,6 +1,6 @@
 package com.dians.stocks.controller;
 
-import com.dians.stocks.dto.CompanyDTO;
+import com.dians.stocks.helper_models.dto.CompanyDTO;
 import com.dians.stocks.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

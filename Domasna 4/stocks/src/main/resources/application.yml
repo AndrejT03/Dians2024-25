@@ -1,7 +1,10 @@
-# Database
+server:
+  port: 8081
+
 spring:
   application:
-    name: app
+    name: raising-stocks
+  # Database
   datasource:
     url: jdbc:postgresql://localhost:5432/dians
     username: username

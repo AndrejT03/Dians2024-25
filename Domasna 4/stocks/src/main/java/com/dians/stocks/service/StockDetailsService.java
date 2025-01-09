@@ -2,8 +2,9 @@ package com.dians.stocks.service;
 
 import com.dians.stocks.domain.Company;
 import com.dians.stocks.domain.StockDetailsHistory;
-import com.dians.stocks.dto.StockDTO;
-import com.dians.stocks.dto.StockGraphDTO;
+import com.dians.stocks.helper_models.microservice.StockValues;
+import com.dians.stocks.helper_models.dto.StockDTO;
+import com.dians.stocks.helper_models.dto.StockGraphDTO;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
@@ -18,5 +19,5 @@ public interface StockDetailsService {
   void addStockDetailToCompany(Long companyId, StockDetailsHistory stockDetailsHistory);
   List<StockGraphDTO> findAllStockGraphDTOByCompanyIdAndYear(Long companyId, Integer year);
   List<Integer> findGraphYearsAvailable(Long companyId);
-  List<StockDetailsHistory> findLast30ByCompanyId(Long companyId);
+  List<StockValues> findLast30ByCompanyId(Long companyId);
 }

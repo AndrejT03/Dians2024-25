@@ -1,7 +1,7 @@
 package com.dians.stocks.service.impl;
 
 import com.dians.stocks.domain.Company;
-import com.dians.stocks.dto.CompanyDTO;
+import com.dians.stocks.helper_models.dto.CompanyDTO;
 import com.dians.stocks.mapper.DTOMapper;
 import com.dians.stocks.repository.CompanyRepository;
 import com.dians.stocks.service.CompanyService;

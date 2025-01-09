@@ -1,7 +1,7 @@
 package com.dians.stocks.service;
 
 import com.dians.stocks.domain.Company;
-import com.dians.stocks.dto.CompanyDTO;
+import com.dians.stocks.helper_models.dto.CompanyDTO;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

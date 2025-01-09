@@ -1,7 +1,7 @@
-package com.dians.stocks.factory.helpers;
+package com.dians.technical_indicators.factory.helpers;
 
-import com.dians.stocks.domain.StockDetailsHistory;
-import com.dians.stocks.domain.TechnicalIndicator;
+import com.dians.technical_indicators.domain.StockValues;
+import com.dians.technical_indicators.domain.TechnicalIndicator;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 public class IndicatorHelper {
 
     // Returns the last 'count' stocks from the given list.
-    public static List<StockDetailsHistory> getLastNStocks(List<StockDetailsHistory> stocks, int count) {
+    public static List<StockValues> getLastNStocks(List<StockValues> stocks, int count) {
         if (stocks == null || stocks.isEmpty() || count <= 1) {
             return new ArrayList<>();
         }
@@ -27,7 +27,7 @@ public class IndicatorHelper {
 
     /* Sets the crucial variables in the given TechnicalIndicator that
      * tell us if a stock has enough data for calculating the indicators. */
-    public static void checkIfIssuerHasEnoughStocksForTechnicalIndicator(List<StockDetailsHistory> stocks, TechnicalIndicator indicator) {
+    public static void checkIfIssuerHasEnoughStocksForTechnicalIndicator(List<StockValues> stocks, TechnicalIndicator indicator) {
         if(stocks.size() < 2) {
             indicator.setDayDataEnough(false);
             indicator.setWeekDataEnough(false);
@@ -51,7 +51,7 @@ public class IndicatorHelper {
     }
 
     // Returns the highest maximum price for the given stocks.
-    public static double getHighestHighForStocks(List<StockDetailsHistory> stocks) {
+    public static double getHighestHighForStocks(List<StockValues> stocks) {
         double highestHigh = stocks.getFirst().getMaxPrice().doubleValue();
 
         for(int i=1; i<stocks.size(); i++) {
@@ -61,7 +61,7 @@ public class IndicatorHelper {
     }
 
     // Returns the lowest minimum price for the given stocks.
-    public static double getLowestLowForStocks(List<StockDetailsHistory> stocks) {
+    public static double getLowestLowForStocks(List<StockValues> stocks) {
         double lowestLow = stocks.getFirst().getMinPrice().doubleValue();
 
         for(int i=1; i<stocks.size(); i++) {

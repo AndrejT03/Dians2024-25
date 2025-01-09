@@ -1,13 +1,13 @@
-package com.dians.stocks;
+package com.dians.technical_indicators;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AppApplication {
+public class TechnicalIndicatorsApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AppApplication.class, args);
+		SpringApplication.run(TechnicalIndicatorsApplication.class, args);
 	}
 
 }

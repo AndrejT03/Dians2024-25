@@ -1,4 +1,4 @@
-package com.dians.stocks.dto;
+package com.dians.stocks.helper_models.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

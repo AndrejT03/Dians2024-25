@@ -2,8 +2,9 @@ package com.dians.stocks.service.impl;
 
 import com.dians.stocks.domain.Company;
 import com.dians.stocks.domain.StockDetailsHistory;
-import com.dians.stocks.dto.StockDTO;
-import com.dians.stocks.dto.StockGraphDTO;
+import com.dians.stocks.helper_models.microservice.StockValues;
+import com.dians.stocks.helper_models.dto.StockDTO;
+import com.dians.stocks.helper_models.dto.StockGraphDTO;
 import com.dians.stocks.mapper.DTOMapper;
 import com.dians.stocks.repository.CompanyRepository;
 import com.dians.stocks.repository.StockDetailsRepository;
@@ -73,10 +74,10 @@ public class StockDetailsServiceImpl implements StockDetailsService {
   }
 
   @Override
-  /* Finds the latest 30 stock details by company id and returns them as a list. */
-  public List<StockDetailsHistory> findLast30ByCompanyId(Long companyId) {
+  /* Finds the latest 30 stock details by company id, maps them to StockValues and returns them as a list. */
+  public List<StockValues> findLast30ByCompanyId(Long companyId) {
     Pageable pageable = PageRequest.of(0, 30, Sort.by("date").descending());
-    return this.stockDetailsRepository.findAllByCompanyId(companyId, pageable).stream().toList();
+    return this.stockDetailsRepository.findAllByCompanyId(companyId, pageable).stream().map(dtoMapper::convertToStockValues).toList();
   }
 
   @Override
