@@ -13,7 +13,7 @@ public class PageController {
   // Returns the static Companies page.
   public String getCompaniesPage(Model model) {
     model.addAttribute("title", "Companies");
-    model.addAttribute("bodyContent", "Companies");
+    model.addAttribute("bodyContent", "companies");
     return "master-template";
   }
 

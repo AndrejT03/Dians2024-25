@@ -1,6 +1,10 @@
 spring:
   application:
     name: raising-stocks
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
 
 server:
   port: 8081
@@ -9,9 +13,3 @@ eureka:
   instance:
     prefer-ip-address: true
     hostname: localhost
-
-  # Thymeleaf
-  thymeleaf:
-    prefix: classpath:/templates/
-    suffix: .html
-    mode: HTML
